@@ -31,19 +31,19 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin rotaları
     Route::prefix('admin')->group(function () {
         // Settings
-        Route::get('/settings', [SettingsController::class, 'index']);
-        Route::post('/settings', [SettingsController::class, 'update']);
-        Route::post('/settings/logo', [SettingsController::class, 'updateLogo']);
-        Route::post('/settings/favicon', [SettingsController::class, 'updateFavicon']);
+        Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'index']);
+        Route::post('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'update']);
+        Route::post('/settings/logo', [App\Http\Controllers\Admin\SettingsController::class, 'updateLogo']);
+        Route::post('/settings/favicon', [App\Http\Controllers\Admin\SettingsController::class, 'updateFavicon']);
 
         // İstatistikler
         Route::prefix('stats')->group(function () {
-            Route::get('/overview', [AdminStatsController::class, 'overview']);
-            Route::get('/visitors', [AdminStatsController::class, 'visitors']);
-            Route::get('/pageviews', [AdminStatsController::class, 'pageViews']);
-            Route::get('/browsers', [AdminStatsController::class, 'browsers']);
-            Route::get('/devices', [AdminStatsController::class, 'devices']);
-            Route::get('/locations', [AdminStatsController::class, 'locations']);
+            Route::get('overview', [AdminStatsController::class, 'overview']);
+            Route::get('visitors', [AdminStatsController::class, 'visitors']);
+            Route::get('pageviews', [AdminStatsController::class, 'pageViews']);
+            Route::get('browsers', [AdminStatsController::class, 'browsers']);
+            Route::get('devices', [AdminStatsController::class, 'devices']);
+            Route::get('locations', [AdminStatsController::class, 'locations']);
         });
 
         // SEO Ayarları
