@@ -1,29 +1,55 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import './base.css';
 
-@layer base {
-  html {
-    font-family: 'Inter', system-ui, sans-serif;
-  }
+/* Temel Stiller */
+body {
+  @apply font-sans text-gray-900 bg-gray-50;
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors;
-  }
-  
-  .btn-secondary {
-    @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors;
-  }
-  
-  .card {
-    @apply bg-white rounded-xl shadow-lg p-6;
-  }
+/* Form Elementleri */
+.input {
+  @apply appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm;
 }
 
-@layer utilities {
-  .text-shadow {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+.btn {
+  @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-primary {
+  @apply text-white bg-primary-600 hover:bg-primary-700 focus:ring-primary-500;
+}
+
+.btn-secondary {
+  @apply text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-gray-500;
+}
+
+/* Animasyonlar */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Özel Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded hover:bg-gray-500;
+}
+
+/* Responsive Yardımcılar */
+@media (max-width: 640px) {
+  .container {
+    @apply px-4;
   }
 }
