@@ -30,4 +30,8 @@ npm-debug.log
 yarn-error.log
 /.fleet
 /.idea
-/.vscode 
+/.vscode
+
+# Keep public and assets
+!public/
+!assets/ 
