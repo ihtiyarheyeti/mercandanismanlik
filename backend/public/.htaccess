@@ -9,13 +9,18 @@
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # Redirect Trailing Slashes If Not A Folder...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
+    # CORS Headers
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
 
-    # Send Requests To Front Controller...
+    # API isteklerini backend'e yönlendir
+    RewriteCond %{REQUEST_URI} ^/api/.*
+    RewriteRule ^api/(.*)$ /index.php [L]
+
+    # Eğer dosya veya dizin değilse ve /api ile başlamıyorsa index.html'e yönlendir
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
+    RewriteCond %{REQUEST_URI} !^/api
+    RewriteRule ^ index.html [L]
 </IfModule>
