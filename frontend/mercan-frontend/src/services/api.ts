@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // API istekleri için ana axios instance'ı
 const api = axios.create({
-  baseURL: 'https://tasgibisin.com.tr/api',
+  baseURL: 'https://tasgibisin.com.tr',
   withCredentials: true,
   headers: {
     'X-Requested-With': 'XMLHttpRequest',
@@ -35,9 +35,9 @@ api.interceptors.request.use(async config => {
     delete config.headers['Content-Type']
   }
 
-  // URL'deki çift api'yi düzelt
-  if (config.url && config.url.startsWith('/api/')) {
-    config.url = config.url.replace('/api/', '/')
+  // URL'yi düzenle
+  if (config.url && !config.url.startsWith('/api/')) {
+    config.url = `/api${config.url}`
   }
   
   return config
