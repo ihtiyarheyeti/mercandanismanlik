@@ -1,0 +1,18 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
+  "exclude": ["src/**/__tests__/*"],
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["node", "vite/client", "vue3-particles"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "allowJs": true,
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
+  }
+} 
