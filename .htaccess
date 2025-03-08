@@ -21,7 +21,7 @@
     RewriteRule ^(.*)$ index.php [L,QSA]
 
     # CORS Headers
-    Header set Access-Control-Allow-Origin "https://tasgibisin.com.tr"
+    Header set Access-Control-Allow-Origin "https://mercandanismanlik.com"
     Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
     Header set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
     Header set Access-Control-Allow-Credentials "true"

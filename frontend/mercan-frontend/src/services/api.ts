@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // API istekleri için ana axios instance'ı
 const api = axios.create({
-  baseURL: 'https://tasgibisin.com.tr',
+  baseURL: 'https://mercandanismanlik.com',
   withCredentials: true,
   headers: {
     'X-Requested-With': 'XMLHttpRequest',
@@ -14,7 +14,7 @@ const api = axios.create({
 // CSRF token'ı al
 const getCsrfToken = async () => {
   try {
-    await axios.get('https://tasgibisin.com.tr/sanctum/csrf-cookie', { withCredentials: true })
+    await axios.get('https://mercandanismanlik.com/sanctum/csrf-cookie', { withCredentials: true })
   } catch (error) {
     console.error('CSRF token alınamadı:', error)
   }
