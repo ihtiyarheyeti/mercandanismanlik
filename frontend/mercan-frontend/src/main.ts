@@ -1,5 +1,7 @@
+import './assets/main.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import Particles from 'vue3-particles'
 import App from './App.vue'
 import router from './router'
 import axios from 'axios'
@@ -37,4 +39,5 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 app.use(Toast, toastOptions)
+app.use(Particles)
 app.mount('#app')
