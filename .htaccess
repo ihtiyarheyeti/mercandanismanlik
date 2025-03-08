@@ -2,10 +2,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     
-    # Frontend dosyaları için
-    RewriteCond %{REQUEST_FILENAME} !-f
+    # Tüm istekleri index.php'ye yönlendir
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ /frontend/mercan-frontend/dist/index.html [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
 </IfModule>
 
 # PHP Ayarları
@@ -16,18 +16,11 @@
     php_value max_input_time 300
 </IfModule>
 
-# Güvenlik ve CORS Başlıkları
+# Güvenlik Başlıkları
 <IfModule mod_headers.c>
-    Header add Access-Control-Allow-Origin: https://mercandanismanlik.com
-    Header add Access-Control-Allow-Methods: "GET, POST, PUT, DELETE, OPTIONS"
-    Header add Access-Control-Allow-Headers: "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
-    Header add Access-Control-Allow-Credentials: "true"
-    Header add Cache-Control: public
-    Header add X-Frame-Options: DENY
-    Header add X-XSS-Protection: "1; mode=block"
-    Header add X-Content-Type-Options: nosniff
-    Header add Strict-Transport-Security: "max-age=63072000"
-    Header add Referrer-Policy: strict-origin-when-cross-origin
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "*"
 </IfModule>
 
 # Hassas Dosyaları Koru
