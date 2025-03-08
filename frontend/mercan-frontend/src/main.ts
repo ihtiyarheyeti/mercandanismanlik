@@ -7,6 +7,10 @@ import axios from 'axios'
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 
+// Font Awesome
+import '@fortawesome/fontawesome-free/css/all.css'
+import '@fortawesome/fontawesome-free/js/all.js'
+
 // Stil dosyaları
 import './style.css'
 
@@ -27,7 +31,7 @@ const toastOptions = {
 }
 
 // Axios yapılandırması
-axios.defaults.baseURL = 'http://127.0.0.1:8000'
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'https://mercandanismanlik.com'
 axios.defaults.withCredentials = true
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
 axios.defaults.headers.common['Accept'] = 'application/json'
