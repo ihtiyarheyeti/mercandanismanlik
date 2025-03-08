@@ -1,6 +1,7 @@
 # Ana dizin için .htaccess
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /
     
     # SSL Yönlendirmesi
     RewriteCond %{HTTPS} off
@@ -10,20 +11,19 @@
     RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
     RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
-    # Frontend dist klasörüne yönlendirme
-    RewriteCond %{REQUEST_URI} !^/backend/
-    RewriteCond %{REQUEST_URI} !^/api/
+    # Assets dosyaları için özel kural
+    RewriteCond %{REQUEST_URI} ^/assets/
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(.*)$ /frontend/mercan-frontend/dist/$1 [L]
+    RewriteRule ^assets/(.*)$ frontend/mercan-frontend/dist/assets/$1 [L]
 
     # API istekleri için backend'e yönlendirme
     RewriteCond %{REQUEST_URI} ^/api/
-    RewriteRule ^api/(.*)$ /backend/public/index.php [L]
+    RewriteRule ^api/(.*)$ backend/public/index.php [L]
 
-    # Eğer frontend dist'te dosya bulunamazsa index.html'e yönlendir
+    # Diğer tüm istekler için
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ /frontend/mercan-frontend/dist/index.html [L]
+    RewriteRule . frontend/mercan-frontend/dist/index.html [L]
 </IfModule>
 
 # PHP Ayarları
@@ -34,14 +34,14 @@
     php_value max_input_time 300
 </IfModule>
 
-# CORS Headers
+# CORS ve Güvenlik Headers
 <IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "https://mercandanismanlik.com"
+    # CORS için varsayılan ayarlar
+    Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
     Header set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
-    Header set Access-Control-Allow-Credentials "true"
-    
-    # Güvenlik Başlıkları
+
+    # Güvenlik başlıkları
     Header set X-XSS-Protection "1; mode=block"
     Header set X-Frame-Options "SAMEORIGIN"
     Header set X-Content-Type-Options "nosniff"
@@ -49,7 +49,16 @@
     Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 </IfModule>
 
-# Önbellekleme
+# Dosya türlerine göre MIME types
+<IfModule mod_mime.c>
+    AddType text/css .css
+    AddType text/javascript .js
+    AddType image/svg+xml .svg
+    AddType application/font-woff .woff
+    AddType application/font-woff2 .woff2
+</IfModule>
+
+# Önbellekleme kuralları
 <FilesMatch "\.(html|php)$">
     Header set Cache-Control "no-cache, no-store, must-revalidate"
     Header set Pragma "no-cache"
@@ -60,36 +69,29 @@
     Header set Cache-Control "public, max-age=31536000"
 </FilesMatch>
 
-# Dosya Tipleri
-<FilesMatch "\.css$">
-    ForceType text/css
-</FilesMatch>
-
-<FilesMatch "\.js$">
-    ForceType application/javascript
-</FilesMatch>
-
 # Gzip Sıkıştırma
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/plain
     AddOutputFilterByType DEFLATE text/html
-    AddOutputFilterByType DEFLATE text/xml
     AddOutputFilterByType DEFLATE text/css
-    AddOutputFilterByType DEFLATE application/xml
-    AddOutputFilterByType DEFLATE application/xhtml+xml
-    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE text/javascript
     AddOutputFilterByType DEFLATE application/javascript
     AddOutputFilterByType DEFLATE application/x-javascript
     AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE application/font-woff
+    AddOutputFilterByType DEFLATE application/font-woff2
 </IfModule>
 
-# Hassas Dosyaları Koru
-<FilesMatch "^\.env">
+# Dizin listelemeyi kapat
+Options -Indexes
+
+# Hassas dosyaları koru
+<FilesMatch "^\.env|composer\.json|composer\.lock|package\.json|package-lock\.json|webpack\.mix\.js|yarn\.lock$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-# Git Dizinini Koru
 <DirectoryMatch "^/.git/">
     Order allow,deny
     Deny from all
