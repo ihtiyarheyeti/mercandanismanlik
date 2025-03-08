@@ -15,11 +15,30 @@ export default defineConfig({
     host: true,
     strictPort: true,
     hmr: {
-      port: 3000,
-      overlay: false
+      host: 'localhost',
+      port: 3000
     },
     watch: {
       usePolling: true
+    }
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    emptyOutDir: true,
+    manifest: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': [
+            'vue',
+            'vue-router',
+            'pinia',
+            '@vueuse/core',
+            'axios'
+          ]
+        }
+      }
     }
   }
 })
