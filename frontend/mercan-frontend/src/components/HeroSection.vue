@@ -4,6 +4,8 @@
     <!-- Particles Background -->
     <Particles
       id="tsparticles"
+      :particlesInit="particlesInit"
+      :particlesLoaded="particlesLoaded"
       :options="{
         background: {
           color: {
@@ -81,7 +83,16 @@
 </template>
 
 <script setup lang="ts">
+import { loadFull } from "tsparticles";
 import Particles from 'vue3-particles'
+
+const particlesInit = async (engine: any) => {
+  await loadFull(engine);
+};
+
+const particlesLoaded = async (container: any) => {
+  console.log("Particles container loaded", container);
+};
 </script>
 
 <style scoped>
