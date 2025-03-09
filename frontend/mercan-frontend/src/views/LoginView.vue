@@ -74,6 +74,10 @@ const handleLogin = async () => {
   error.value = '';
 
   try {
+    // CSRF token'ı al
+    await api.get('/sanctum/csrf-cookie');
+
+    // Login isteği
     const response = await api.post('/api/login', {
       email: email.value,
       password: password.value
@@ -81,12 +85,19 @@ const handleLogin = async () => {
 
     console.log('Login yanıtı:', response.data);
 
-    if (response.data?.access_token) {
-      localStorage.setItem('token', response.data.access_token);
-      await router.push('/admin');
-    } else {
-      throw new Error('Giriş başarısız: Token alınamadı');
+    const token = response.data?.access_token;
+    if (!token) {
+      throw new Error('Token alınamadı: Sunucu yanıtı geçersiz');
     }
+
+    // Token'ı sakla
+    localStorage.setItem('token', token);
+    
+    // Authorization header'ını ayarla
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+    // Yönlendir
+    await router.push('/admin');
 
   } catch (err: any) {
     console.error('Login hatası:', err);
