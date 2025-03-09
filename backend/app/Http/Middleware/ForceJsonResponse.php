@@ -16,13 +16,11 @@ class ForceJsonResponse
         // Response'u al
         $response = $next($request);
         
-        // Response'un content type'ını kontrol et ve ayarla
-        if (!$response->headers->has('Content-Type')) {
-            $response->headers->set('Content-Type', 'application/json');
-        }
+        // Response'un content type'ını ayarla
+        $response->headers->set('Content-Type', 'application/json');
 
         // CORS başlıklarını ekle
-        $response->headers->set('Access-Control-Allow-Origin', config('cors.allowed_origins')[0]);
+        $response->headers->set('Access-Control-Allow-Origin', 'https://mercandanismanlik.com');
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, X-Token-Auth, Authorization');
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
@@ -36,12 +34,13 @@ class ForceJsonResponse
         }
 
         // JSON değilse, JSON formatına çevir
-        $jsonResponse = [
+        $data = [
             'status' => $response->isSuccessful() ? 'success' : 'error',
+            'data' => $content,
             'message' => strip_tags($content)
         ];
 
-        return response()->json($jsonResponse, $response->getStatusCode());
+        return response()->json($data, $response->getStatusCode());
     }
 
     private function isValidJson($string) 

@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // API istekleri için ana axios instance'ı
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL + '/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
   withCredentials: true,
   headers: {
     'X-Requested-With': 'XMLHttpRequest',
@@ -64,7 +64,15 @@ api.interceptors.response.use(
       localStorage.removeItem('token')
       window.location.href = '/login'
     }
-    return Promise.reject(error)
+    
+    const errorMessage = error.response?.data?.message 
+      || error.response?.data?.error 
+      || 'Bir hata oluştu';
+      
+    return Promise.reject({
+      ...error,
+      message: errorMessage
+    });
   }
 )
 
