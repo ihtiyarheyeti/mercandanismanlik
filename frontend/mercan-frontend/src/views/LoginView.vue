@@ -74,14 +74,19 @@ const handleLogin = async () => {
   error.value = '';
 
   try {
+    console.log('Login isteği gönderiliyor:', { email: email.value })
     const response = await api.post('/login', {
       email: email.value,
       password: password.value
     })
+    console.log('Login response:', response.data)
 
     if (response.data.access_token) {
       localStorage.setItem('token', response.data.access_token)
       await router.push('/admin')
+    } else {
+      error.value = 'Sunucudan geçerli bir token alınamadı'
+      console.error('Token alınamadı:', response.data)
     }
   } catch (err: any) {
     console.error('Login hatası:', err)

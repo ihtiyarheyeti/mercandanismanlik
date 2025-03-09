@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // API istekleri için ana axios instance'ı
 const api = axios.create({
-  baseURL: 'https://mercandanismanlik.com',
+  baseURL: 'https://mercandanismanlik.com/api',
   withCredentials: true,
   headers: {
     'X-Requested-With': 'XMLHttpRequest',
@@ -11,20 +11,8 @@ const api = axios.create({
   }
 })
 
-// CSRF token'ı al
-const getCsrfToken = async () => {
-  try {
-    await axios.get('https://mercandanismanlik.com/sanctum/csrf-cookie', { withCredentials: true })
-  } catch (error) {
-    console.error('CSRF token alınamadı:', error)
-  }
-}
-
 // Request interceptor
 api.interceptors.request.use(async config => {
-  // Her istekten önce CSRF token'ı al
-  await getCsrfToken()
-
   const token = localStorage.getItem('token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -34,19 +22,18 @@ api.interceptors.request.use(async config => {
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type']
   }
-
-  // URL'yi düzenle
-  if (config.url && !config.url.startsWith('/api/')) {
-    config.url = `/api${config.url}`
-  }
   
   return config
 })
 
 // Response interceptor
 api.interceptors.response.use(
-  response => response,
+  response => {
+    console.log('API Response:', response.data)
+    return response
+  },
   error => {
+    console.error('API Error:', error.response?.data || error.message)
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
       window.location.href = '/login'
