@@ -21,20 +21,18 @@ const getCsrfToken = async () => {
     })
   } catch (error) {
     console.error('CSRF token alınamadı:', error)
+    throw error
   }
 }
 
 // Request interceptor
 api.interceptors.request.use(
   async config => {
-    // CSRF token al
-    await getCsrfToken()
-    
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    try {
+      await getCsrfToken() // Her istekten önce CSRF token al
+    } catch (error) {
+      console.error('CSRF token alınırken hata:', error)
     }
-    
     return config
   },
   error => {
@@ -45,17 +43,7 @@ api.interceptors.request.use(
 
 // Response interceptor
 api.interceptors.response.use(
-  response => {
-    if (response.data?.status === 'error') {
-      return Promise.reject({
-        response: {
-          data: response.data,
-          status: 400
-        }
-      })
-    }
-    return response
-  },
+  response => response,
   error => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
@@ -67,6 +55,12 @@ api.interceptors.response.use(
       || error.message 
       || 'Bir hata oluştu'
       
+    console.error('API Yanıt Hatası:', {
+      status: error.response?.status,
+      message: errorMessage,
+      data: error.response?.data
+    })
+
     return Promise.reject({
       ...error,
       message: errorMessage
@@ -74,4 +68,4 @@ api.interceptors.response.use(
   }
 )
 
-export default api 
+export default api
