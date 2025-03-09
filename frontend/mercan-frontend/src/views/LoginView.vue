@@ -40,12 +40,6 @@
             :disabled="loading"
             class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            <span v-if="loading" class="absolute left-0 inset-y-0 flex items-center pl-3">
-              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </span>
             {{ loading ? 'Giriş yapılıyor...' : 'Giriş Yap' }}
           </button>
         </div>
@@ -53,6 +47,10 @@
         <div v-if="error" class="text-red-600 text-center text-sm">
           {{ error }}
         </div>
+
+        <pre v-if="debugInfo" class="mt-4 p-4 bg-gray-800 text-white rounded overflow-auto text-xs">
+          {{ debugInfo }}
+        </pre>
       </form>
     </div>
   </div>
@@ -68,48 +66,80 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
+const debugInfo = ref('')
+
+const log = (message: string, data?: any) => {
+  const timestamp = new Date().toISOString()
+  const logMessage = `[${timestamp}] ${message}\n${data ? JSON.stringify(data, null, 2) : ''}\n\n`
+  debugInfo.value += logMessage
+  console.log(message, data)
+}
 
 const handleLogin = async () => {
-  loading.value = true;
-  error.value = '';
-  console.log('Login başlıyor...');
+  loading.value = true
+  error.value = ''
+  debugInfo.value = ''
+
+  log('Login başlıyor...', { email: email.value })
 
   try {
-    // CSRF token isteği
-    console.log('CSRF token alınıyor...');
-    const csrfResponse = await axios.get('https://mercandanismanlik.com/sanctum/csrf-cookie', {
-      withCredentials: true
-    });
-    console.log('CSRF response:', csrfResponse);
+    log('CSRF token isteği yapılıyor...')
+    
+    const csrfResponse = await fetch('https://mercandanismanlik.com/sanctum/csrf-cookie', {
+      method: 'GET',
+      credentials: 'include'
+    })
+    
+    log('CSRF response:', {
+      status: csrfResponse.status,
+      ok: csrfResponse.ok,
+      headers: Object.fromEntries(csrfResponse.headers.entries())
+    })
 
-    // Login isteği
-    console.log('Login isteği yapılıyor...');
-    const loginResponse = await axios.post('https://mercandanismanlik.com/api/login', {
-      email: email.value,
-      password: password.value
-    }, {
-      withCredentials: true,
+    if (!csrfResponse.ok) {
+      throw new Error('CSRF token alınamadı')
+    }
+
+    log('Login isteği yapılıyor...')
+    
+    const loginResponse = await fetch('https://mercandanismanlik.com/api/login', {
+      method: 'POST',
+      credentials: 'include',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    });
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value
+      })
+    })
 
-    console.log('Login response:', loginResponse);
+    const data = await loginResponse.json()
+    
+    log('Login response:', {
+      status: loginResponse.status,
+      ok: loginResponse.ok,
+      headers: Object.fromEntries(loginResponse.headers.entries()),
+      data
+    })
 
-    if (loginResponse.data.access_token) {
-      localStorage.setItem('token', loginResponse.data.access_token);
-      await router.push('/admin');
+    if (!loginResponse.ok) {
+      throw new Error(data.message || 'Login başarısız')
+    }
+
+    if (data.access_token) {
+      localStorage.setItem('token', data.access_token)
+      await router.push('/admin')
     } else {
-      throw new Error('Token alınamadı');
+      throw new Error('Token alınamadı')
     }
 
   } catch (err: any) {
-    console.error('Login error:', err);
-    console.error('Error response:', err.response);
-    error.value = err.response?.data?.message || err.message || 'Giriş yapılırken bir hata oluştu';
+    log('Hata oluştu:', err)
+    error.value = err.message || 'Giriş yapılırken bir hata oluştu'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 </script> 
