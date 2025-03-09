@@ -37,10 +37,9 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        Log::info('Login isteği alındı', [
+        Log::info('Login isteği başladı', [
             'email' => $request->email,
-            'headers' => $request->headers->all(),
-            'ip' => $request->ip()
+            'headers' => $request->headers->all()
         ]);
 
         try {
@@ -52,32 +51,38 @@ class AuthController extends Controller
             if (Auth::attempt($credentials)) {
                 $user = Auth::user();
                 $token = $user->createToken('auth-token')->plainTextToken;
-                
-                Log::info('Giriş başarılı', [
+
+                Log::info('Login başarılı', [
                     'user_id' => $user->id,
-                    'email' => $user->email,
-                    'token' => $token
+                    'email' => $user->email
                 ]);
 
                 return response()->json([
                     'status' => 'success',
+                    'message' => 'Giriş başarılı',
                     'access_token' => $token,
                     'token_type' => 'Bearer',
-                    'user' => $user
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email
+                    ]
                 ], 200, [
-                    'Content-Type' => 'application/json'
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
                 ]);
             }
 
-            Log::warning('Giriş başarısız - Kimlik bilgileri hatalı', [
+            Log::warning('Login başarısız - Kimlik bilgileri hatalı', [
                 'email' => $request->email
             ]);
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Geçersiz kimlik bilgileri'
+                'message' => 'E-posta veya şifre hatalı'
             ], 401, [
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
             ]);
 
         } catch (\Exception $e) {
@@ -88,18 +93,33 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Giriş işlemi sırasında bir hata oluştu',
+                'message' => 'Bir hata oluştu',
                 'error' => $e->getMessage()
             ], 500, [
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
             ]);
         }
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        try {
+            $request->user()->currentAccessToken()->delete();
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Çıkış başarılı'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Logout hatası', [
+                'error' => $e->getMessage()
+            ]);
 
-        return response()->json(['message' => 'Başarıyla çıkış yapıldı']);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Çıkış yapılırken bir hata oluştu'
+            ], 500);
+        }
     }
 }
