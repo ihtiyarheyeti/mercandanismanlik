@@ -12,101 +12,13 @@
     RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
     # API istekleri için backend'e yönlendir
-    RewriteCond %{REQUEST_URI} ^/api/(.*)$
-    RewriteRule ^api/(.*)$ /backend/public/index.php [L,QSA]
+    RewriteCond %{REQUEST_URI} ^/api/
+    RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
 
     # Statik dosyalar için frontend dist klasörüne bak
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg)$
-    RewriteRule ^(.*)$ /frontend/mercan-frontend/dist/$1 [L]
+    RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
+    RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
 
-    # Frontend için tüm istekleri index.html'e yönlendir
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ /frontend/mercan-frontend/dist/index.html [L]
+    # Tüm diğer istekleri frontend index.html'e yönlendir (SPA için)
+    RewriteRule ^ frontend/mercan-frontend/dist/index.html [L]
 </IfModule>
-
-# PHP Ayarları
-<IfModule mod_php.c>
-    php_value upload_max_filesize 64M
-    php_value post_max_size 64M
-    php_value max_execution_time 300
-    php_value max_input_time 300
-</IfModule>
-
-# CORS Headers
-<IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "https://mercandanismanlik.com"
-    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-    Header set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
-    Header set Access-Control-Allow-Credentials "true"
-</IfModule>
-
-# Dosya türlerine göre MIME types
-<IfModule mod_mime.c>
-    AddType text/css .css
-    AddType text/javascript .js
-    AddType image/svg+xml .svg
-    AddType application/font-woff .woff
-    AddType application/font-woff2 .woff2
-</IfModule>
-
-# Önbellekleme kuralları
-<FilesMatch "\.(html|php)$">
-    Header set Cache-Control "no-cache, no-store, must-revalidate"
-    Header set Pragma "no-cache"
-    Header set Expires 0
-</FilesMatch>
-
-<FilesMatch "\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2)$">
-    Header set Cache-Control "public, max-age=31536000"
-</FilesMatch>
-
-# Gzip Sıkıştırma
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/plain
-    AddOutputFilterByType DEFLATE text/html
-    AddOutputFilterByType DEFLATE text/css
-    AddOutputFilterByType DEFLATE text/javascript
-    AddOutputFilterByType DEFLATE application/javascript
-    AddOutputFilterByType DEFLATE application/x-javascript
-    AddOutputFilterByType DEFLATE application/json
-    AddOutputFilterByType DEFLATE image/svg+xml
-    AddOutputFilterByType DEFLATE application/font-woff
-    AddOutputFilterByType DEFLATE application/font-woff2
-</IfModule>
-
-# Dizin listelemeyi kapat
-Options -Indexes
-
-# Hassas dosyaları koru
-<FilesMatch "^\.env|composer\.json|composer\.lock|package\.json|package-lock\.json|webpack\.mix\.js|yarn\.lock$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
-
-<DirectoryMatch "^/.git/">
-    Order allow,deny
-    Deny from all
-</DirectoryMatch>
-
-# Cloudflare Başlıkları
-Header set Expect-CT "max-age=7776000, enforce"
-
-# Cache Control
-<FilesMatch "\.(html|htm)$">
-    Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
-</FilesMatch>
-
-<FilesMatch "\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$">
-    Header set Access-Control-Allow-Origin "*"
-    Header set Cache-Control "public, max-age=31536000"
-</FilesMatch>
-
-<FilesMatch "\.css$">
-    ForceType text/css
-</FilesMatch>
-
-<FilesMatch "\.js$">
-    ForceType application/javascript
-</FilesMatch> 
