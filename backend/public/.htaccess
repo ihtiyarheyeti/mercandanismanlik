@@ -86,7 +86,7 @@
     php_value max_input_time 300
 </IfModule>
 
-# CORS Ayarları
+# CORS Headers
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "https://mercandanismanlik.com"
     Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"

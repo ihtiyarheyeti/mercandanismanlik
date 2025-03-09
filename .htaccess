@@ -13,7 +13,7 @@
 
     # API istekleri için backend'e yönlendir
     RewriteCond %{REQUEST_URI} ^/api/(.*)$
-    RewriteRule ^api/(.*)$ /backend/public/index.php [L]
+    RewriteRule ^api/(.*)$ /backend/public/index.php [L,QSA]
 
     # Statik dosyalar için frontend dist klasörüne bak
     RewriteCond %{REQUEST_FILENAME} !-f
@@ -34,19 +34,12 @@
     php_value max_input_time 300
 </IfModule>
 
-# CORS ve Güvenlik Headers
+# CORS Headers
 <IfModule mod_headers.c>
-    # CORS için varsayılan ayarlar
-    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Origin "https://mercandanismanlik.com"
     Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
     Header set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
-
-    # Güvenlik başlıkları
-    Header set X-XSS-Protection "1; mode=block"
-    Header set X-Frame-Options "SAMEORIGIN"
-    Header set X-Content-Type-Options "nosniff"
-    Header set Referrer-Policy "strict-origin-when-cross-origin"
-    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header set Access-Control-Allow-Credentials "true"
 </IfModule>
 
 # Dosya türlerine göre MIME types
