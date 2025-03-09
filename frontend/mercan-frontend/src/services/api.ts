@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const baseURL = import.meta.env.VITE_API_URL || 'https://mercandanismanlik.com'
 
 // API istekleri için ana axios instance'ı
 const api = axios.create({
@@ -8,8 +8,7 @@ const api = axios.create({
   withCredentials: true,
   headers: {
     'X-Requested-With': 'XMLHttpRequest',
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
+    'Accept': 'application/json'
   }
 })
 
@@ -21,50 +20,28 @@ const getCsrfToken = async () => {
     })
   } catch (error) {
     console.error('CSRF token alınamadı:', error)
-    throw error
   }
 }
 
-// Request interceptor
+// Her istekten önce CSRF token al
 api.interceptors.request.use(
   async config => {
-    try {
-      await getCsrfToken() // Her istekten önce CSRF token al
-    } catch (error) {
-      console.error('CSRF token alınırken hata:', error)
-    }
+    await getCsrfToken()
     return config
   },
-  error => {
-    console.error('API İstek Hatası:', error)
-    return Promise.reject(error)
-  }
+  error => Promise.reject(error)
 )
 
 // Response interceptor
 api.interceptors.response.use(
   response => response,
   error => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
-    }
-    
-    const errorMessage = error.response?.data?.message 
-      || error.response?.data?.error 
-      || error.message 
-      || 'Bir hata oluştu'
-      
-    console.error('API Yanıt Hatası:', {
+    console.error('API Hatası:', {
       status: error.response?.status,
-      message: errorMessage,
+      message: error.response?.data?.message || error.message,
       data: error.response?.data
     })
-
-    return Promise.reject({
-      ...error,
-      message: errorMessage
-    })
+    return Promise.reject(error)
   }
 )
 

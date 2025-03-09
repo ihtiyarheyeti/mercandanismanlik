@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/services/api'
+import axios from 'axios'
 
 const router = useRouter()
 const email = ref('')
@@ -72,35 +72,41 @@ const error = ref('')
 const handleLogin = async () => {
   loading.value = true;
   error.value = '';
+  console.log('Login başlıyor...');
 
   try {
-    // CSRF token'ı al
-    await api.get('/sanctum/csrf-cookie');
+    // CSRF token isteği
+    console.log('CSRF token alınıyor...');
+    const csrfResponse = await axios.get('https://mercandanismanlik.com/sanctum/csrf-cookie', {
+      withCredentials: true
+    });
+    console.log('CSRF response:', csrfResponse);
 
     // Login isteği
-    const response = await api.post('/api/login', {
+    console.log('Login isteği yapılıyor...');
+    const loginResponse = await axios.post('https://mercandanismanlik.com/api/login', {
       email: email.value,
       password: password.value
+    }, {
+      withCredentials: true,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
     });
 
-    console.log('Login yanıtı:', response.data);
+    console.log('Login response:', loginResponse);
 
-    const token = response.data?.access_token;
-    if (!token) {
-      throw new Error('Token alınamadı: Sunucu yanıtı geçersiz');
+    if (loginResponse.data.access_token) {
+      localStorage.setItem('token', loginResponse.data.access_token);
+      await router.push('/admin');
+    } else {
+      throw new Error('Token alınamadı');
     }
 
-    // Token'ı sakla
-    localStorage.setItem('token', token);
-    
-    // Authorization header'ını ayarla
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-    // Yönlendir
-    await router.push('/admin');
-
   } catch (err: any) {
-    console.error('Login hatası:', err);
+    console.error('Login error:', err);
+    console.error('Error response:', err.response);
     error.value = err.response?.data?.message || err.message || 'Giriş yapılırken bir hata oluştu';
   } finally {
     loading.value = false;
