@@ -11,14 +11,9 @@
     RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
     RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
-    # Assets için doğru MIME type ayarla
-    <FilesMatch "\.(js|mjs)$">
-        SetHandler application/javascript
-    </FilesMatch>
-    
-    <FilesMatch "\.css$">
-        SetHandler text/css
-    </FilesMatch>
+    # Cloudflare isteklerini yönlendir
+    RewriteCond %{REQUEST_URI} ^/cdn-cgi/
+    RewriteRule ^ - [L]
 
     # API istekleri için backend'e yönlendir
     RewriteCond %{REQUEST_URI} ^/api/
@@ -30,7 +25,7 @@
     RewriteRule ^assets/(.*)$ frontend/mercan-frontend/dist/assets/$1 [L]
 
     # Diğer statik dosyalar için
-    RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
+    RewriteCond %{REQUEST_URI} \.(js|mjs|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
 
@@ -42,8 +37,9 @@
 
 # MIME Types
 <IfModule mod_mime.c>
-    RemoveType .js .css
-    AddType application/javascript .js .mjs
+    RemoveType .js .mjs .css
+    AddType application/javascript .js
+    AddType application/javascript .mjs
     AddType text/css .css
     AddType image/svg+xml .svg
     AddType application/font-woff .woff
@@ -61,8 +57,9 @@
 
 # CORS ve Güvenlik Headers
 <IfModule mod_headers.c>
-    # CORS Headers
-    Header set Access-Control-Allow-Origin "https://mercandanismanlik.com"
+    # CORS Headers - Cloudflare için düzenlendi
+    SetEnvIf Origin "^http(s)?://(.+\.)?(mercandanismanlik\.com)$" CORS_ALLOW_ORIGIN=$0
+    Header set Access-Control-Allow-Origin %{CORS_ALLOW_ORIGIN}e env=CORS_ALLOW_ORIGIN
     Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
     Header set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
     Header set Access-Control-Allow-Credentials "true"
@@ -71,21 +68,23 @@
     <FilesMatch "\.(js|mjs)$">
         Header set Content-Type "application/javascript"
         Header set X-Content-Type-Options "nosniff"
+        Header set Cache-Control "public, max-age=31536000"
     </FilesMatch>
 
     # CSS dosyaları için
     <FilesMatch "\.css$">
         Header set Content-Type "text/css"
         Header set X-Content-Type-Options "nosniff"
+        Header set Cache-Control "public, max-age=31536000"
     </FilesMatch>
 
     # Güvenlik başlıkları
     Header set X-Frame-Options "SAMEORIGIN"
     Header set X-XSS-Protection "1; mode=block"
     
-    # Cache Control
-    <FilesMatch "\.(js|css|jpg|jpeg|png|gif|ico|svg|woff|woff2)$">
-        Header set Cache-Control "public, max-age=31536000"
+    # Cache Control - Cloudflare ile uyumlu
+    <FilesMatch "\.(jpg|jpeg|png|gif|ico|svg|woff|woff2)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
     </FilesMatch>
 </IfModule>
 
@@ -113,9 +112,19 @@
     BrowserMatch ^Mozilla/4\.0[678] no-gzip
     BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
     
-    # Önbelleğe alma
+    # Vary header
     Header append Vary User-Agent env=!dont-vary
+    Header append Vary Accept-Encoding
 </IfModule>
 
 # DirectoryIndex
 DirectoryIndex frontend/mercan-frontend/dist/index.html
+
+# Cloudflare için ek ayarlar
+<IfModule mod_headers.c>
+    # Browser cache bypass için
+    <FilesMatch "\.(js|mjs|css)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+        Header set Vary "Accept-Encoding"
+    </FilesMatch>
+</IfModule>
