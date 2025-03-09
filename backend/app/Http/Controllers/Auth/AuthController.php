@@ -65,9 +65,7 @@ class AuthController extends Controller
                     'token_type' => 'Bearer',
                     'user' => $user
                 ], 200, [
-                    'Content-Type' => 'application/json',
-                    'Access-Control-Allow-Origin' => 'https://mercandanismanlik.com',
-                    'Access-Control-Allow-Credentials' => 'true'
+                    'Content-Type' => 'application/json'
                 ]);
             }
 
