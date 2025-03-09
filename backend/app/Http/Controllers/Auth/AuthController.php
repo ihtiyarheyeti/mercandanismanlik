@@ -37,6 +37,13 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        Log::debug('Login isteği detayları', [
+            'tüm_request' => $request->all(),
+            'headers' => $request->headers->all(),
+            'session' => $request->session()->all(),
+            'cookies' => $request->cookies->all()
+        ]);
+
         Log::info('Giriş isteği başladı', [
             'email' => $request->email,
             'ip' => $request->ip(),
@@ -48,6 +55,12 @@ class AuthController extends Controller
             $credentials = $request->validate([
                 'email' => ['required', 'email'],
                 'password' => ['required'],
+            ]);
+
+            Log::debug('Kimlik doğrulama başlıyor', [
+                'email' => $request->email,
+                'auth_check' => Auth::check(),
+                'session_id' => session()->getId()
             ]);
 
             if (!Auth::attempt($credentials)) {
@@ -63,7 +76,17 @@ class AuthController extends Controller
             }
 
             $user = Auth::user();
+            Log::debug('Token oluşturuluyor', [
+                'user_id' => $user->id,
+                'auth_check' => Auth::check()
+            ]);
+
             $token = $user->createToken('auth-token')->plainTextToken;
+
+            Log::debug('Token oluşturuldu', [
+                'token_length' => strlen($token),
+                'user_id' => $user->id
+            ]);
 
             Log::info('Giriş başarılı', [
                 'user_id' => $user->id,
