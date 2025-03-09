@@ -38,13 +38,19 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
+            Log::info('Login isteği başladı', [
+                'email' => $request->email,
+                'headers' => $request->headers->all(),
+                'cookies' => $request->cookies->all()
+            ]);
+
             $credentials = $request->validate([
                 'email' => ['required', 'email'],
                 'password' => ['required'],
             ]);
 
-            if (!Auth::attempt($credentials, true)) {
-                Log::warning('Giriş başarısız', [
+            if (!Auth::attempt($credentials)) {
+                Log::warning('Giriş başarısız - kimlik doğrulama hatası', [
                     'email' => $request->email,
                     'ip' => $request->ip()
                 ]);
@@ -55,16 +61,16 @@ class AuthController extends Controller
             }
 
             $user = Auth::user();
-            $token = $user->createToken('auth-token')->plainTextToken;
+            $token = $user->createToken('auth-token');
 
-            Log::info('Giriş başarılı', [
+            Log::info('Token oluşturuldu', [
                 'user_id' => $user->id,
-                'email' => $user->email,
-                'ip' => $request->ip()
+                'token' => $token->plainTextToken,
+                'abilities' => $token->accessToken->abilities ?? []
             ]);
 
             return response()->json([
-                'access_token' => $token,
+                'access_token' => $token->plainTextToken,
                 'token_type' => 'Bearer',
                 'user' => [
                     'id' => $user->id,
@@ -74,15 +80,20 @@ class AuthController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Giriş hatası', [
+            Log::error('Login hatası', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'request' => [
+                    'all' => $request->all(),
+                    'headers' => $request->headers->all(),
+                    'cookies' => $request->cookies->all()
+                ]
             ]);
 
             return response()->json([
-                'message' => 'Giriş yapılırken bir hata oluştu',
-                'error' => $e->getMessage()
+                'message' => 'Giriş yapılırken bir hata oluştu: ' . $e->getMessage()
             ], 500);
         }
     }
