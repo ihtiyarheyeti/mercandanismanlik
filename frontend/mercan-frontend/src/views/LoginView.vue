@@ -79,12 +79,13 @@ const handleLogin = async () => {
       password: password.value
     });
 
-    // Token kontrolü
-    if (response.data?.status === 'success' && response.data?.access_token) {
+    console.log('Login yanıtı:', response.data);
+
+    if (response.data?.access_token) {
       localStorage.setItem('token', response.data.access_token);
       await router.push('/admin');
     } else {
-      throw new Error(response.data?.message || 'Giriş başarısız: Token alınamadı');
+      throw new Error('Giriş başarısız: Token alınamadı');
     }
 
   } catch (err: any) {

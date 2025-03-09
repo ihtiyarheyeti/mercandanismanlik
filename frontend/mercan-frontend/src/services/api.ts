@@ -1,8 +1,10 @@
 import axios from 'axios'
 
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 // API istekleri için ana axios instance'ı
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+  baseURL,
   withCredentials: true,
   headers: {
     'X-Requested-With': 'XMLHttpRequest',
@@ -11,17 +13,27 @@ const api = axios.create({
   }
 })
 
+// CSRF token alma fonksiyonu
+const getCsrfToken = async () => {
+  try {
+    await axios.get(`${baseURL}/sanctum/csrf-cookie`, {
+      withCredentials: true
+    })
+  } catch (error) {
+    console.error('CSRF token alınamadı:', error)
+  }
+}
+
 // Request interceptor
 api.interceptors.request.use(
   async config => {
+    // CSRF token al
+    await getCsrfToken()
+    
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    
-    config.headers['X-Requested-With'] = 'XMLHttpRequest'
-    config.headers['Accept'] = 'application/json'
-    config.headers['Content-Type'] = 'application/json'
     
     return config
   },

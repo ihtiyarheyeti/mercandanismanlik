@@ -24,11 +24,20 @@ class Handler extends ExceptionHandler
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
-            \Log::error($e->getMessage(), [
-                'exception' => get_class($e),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+            \Log::error('Uygulama Hatası', [
+                'hata_mesaji' => $e->getMessage(),
+                'sinif' => get_class($e),
+                'dosya' => $e->getFile(),
+                'satir' => $e->getLine(),
+                'iz' => $e->getTraceAsString(),
+                'request' => [
+                    'url' => request()->fullUrl(),
+                    'method' => request()->method(),
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'headers' => request()->headers->all(),
+                    'input' => request()->except(['password', 'password_confirmation'])
+                ]
             ]);
         });
     }

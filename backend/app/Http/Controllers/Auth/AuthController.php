@@ -37,8 +37,10 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        Log::info('Login isteği başladı', [
+        Log::info('Giriş isteği başladı', [
             'email' => $request->email,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
             'headers' => $request->headers->all()
         ]);
 
@@ -49,12 +51,13 @@ class AuthController extends Controller
             ]);
 
             if (!Auth::attempt($credentials)) {
-                Log::warning('Login başarısız - Kimlik bilgileri hatalı', [
-                    'email' => $request->email
+                Log::warning('Giriş başarısız - Kimlik bilgileri hatalı', [
+                    'email' => $request->email,
+                    'ip' => $request->ip(),
+                    'timestamp' => now()->toDateTimeString()
                 ]);
 
                 return response()->json([
-                    'status' => 'error',
                     'message' => 'E-posta veya şifre hatalı'
                 ], 401);
             }
@@ -62,14 +65,15 @@ class AuthController extends Controller
             $user = Auth::user();
             $token = $user->createToken('auth-token')->plainTextToken;
 
-            Log::info('Login başarılı', [
+            Log::info('Giriş başarılı', [
                 'user_id' => $user->id,
-                'email' => $user->email
+                'email' => $user->email,
+                'ip' => $request->ip(),
+                'timestamp' => now()->toDateTimeString(),
+                'token_type' => 'Sanctum'
             ]);
 
             return response()->json([
-                'status' => 'success',
-                'message' => 'Giriş başarılı',
                 'access_token' => $token,
                 'token_type' => 'Bearer',
                 'user' => [
@@ -80,13 +84,20 @@ class AuthController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Login hatası', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            Log::error('Giriş hatası', [
+                'hata_mesaji' => $e->getMessage(),
+                'sinif' => get_class($e),
+                'dosya' => $e->getFile(),
+                'satir' => $e->getLine(),
+                'iz' => $e->getTraceAsString(),
+                'request' => [
+                    'email' => $request->email,
+                    'ip' => $request->ip(),
+                    'timestamp' => now()->toDateTimeString()
+                ]
             ]);
 
             return response()->json([
-                'status' => 'error',
                 'message' => 'Bir hata oluştu',
                 'error' => $e->getMessage()
             ], 500);
