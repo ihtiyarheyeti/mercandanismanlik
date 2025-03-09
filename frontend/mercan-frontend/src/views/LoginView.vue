@@ -74,43 +74,49 @@ const handleLogin = async () => {
   error.value = '';
 
   try {
-    console.log('Login isteği gönderiliyor:', { email: email.value })
+    console.log('Login isteği gönderiliyor:', { email: email.value });
     const response = await api.post('/login', {
       email: email.value,
       password: password.value
-    })
-    console.log('Login response:', response)
-    console.log('Response data:', response.data)
-    console.log('Response status:', response.status)
-    console.log('Response headers:', response.headers)
+    });
 
-    if (response.data && response.data.access_token) {
-      console.log('Token alındı:', response.data.access_token)
-      localStorage.setItem('token', response.data.access_token)
-      await router.push('/admin')
-    } else {
-      console.log('Response data içeriği:', response.data)
-      error.value = 'Sunucudan geçerli bir token alınamadı'
-      console.error('Token alınamadı. Response:', response)
+    console.log('Login yanıtı:', {
+      status: response.status,
+      headers: response.headers,
+      data: response.data
+    });
+
+    // Response'un geçerli olup olmadığını kontrol et
+    if (!response.data) {
+      throw new Error('Sunucudan yanıt alınamadı');
     }
+
+    // Status kontrolü
+    if (response.data.status === 'error') {
+      throw new Error(response.data.message || 'Giriş işlemi başarısız');
+    }
+
+    // Token kontrolü
+    if (!response.data.access_token) {
+      throw new Error('Token bilgisi bulunamadı');
+    }
+
+    // Token'ı kaydet ve yönlendir
+    localStorage.setItem('token', response.data.access_token);
+    await router.push('/admin');
+
   } catch (err: any) {
-    console.error('Login hatası detayları:', {
-      message: err.message,
-      response: err.response,
-      request: err.request,
-      config: err.config
-    })
-    if (err.response?.data?.errors?.email) {
-      error.value = err.response.data.errors.email[0]
-    } else if (err.response?.data?.message) {
-      error.value = err.response.data.message
-    } else if (err.request) {
-      error.value = 'Sunucuya bağlanılamadı'
+    console.error('Login hatası:', err);
+    
+    if (err.response?.data?.message) {
+      error.value = err.response.data.message;
+    } else if (err.message) {
+      error.value = err.message;
     } else {
-      error.value = 'Bir hata oluştu'
+      error.value = 'Giriş yapılırken bir hata oluştu';
     }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 };
 </script> 
