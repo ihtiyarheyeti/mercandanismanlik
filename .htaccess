@@ -11,19 +11,19 @@
     RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
     RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
-    # Assets dosyaları için özel kural
-    RewriteCond %{REQUEST_URI} ^/assets/
+    # API istekleri için backend'e yönlendir
+    RewriteCond %{REQUEST_URI} ^/api/(.*)$
+    RewriteRule ^api/(.*)$ /backend/public/index.php [L]
+
+    # Statik dosyalar için frontend dist klasörüne bak
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^assets/(.*)$ frontend/mercan-frontend/dist/assets/$1 [L]
+    RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg)$
+    RewriteRule ^(.*)$ /frontend/mercan-frontend/dist/$1 [L]
 
-    # API istekleri için backend'e yönlendirme
-    RewriteCond %{REQUEST_URI} ^/api/
-    RewriteRule ^api/(.*)$ backend/public/index.php [L]
-
-    # Diğer tüm istekler için
+    # Frontend için tüm istekleri index.html'e yönlendir
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule . frontend/mercan-frontend/dist/index.html [L]
+    RewriteRule ^(.*)$ /frontend/mercan-frontend/dist/index.html [L]
 </IfModule>
 
 # PHP Ayarları
