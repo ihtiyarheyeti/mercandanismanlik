@@ -12,7 +12,7 @@
     RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
     # API istekleri için backend'e yönlendir
-    RewriteCond %{REQUEST_URI} ^/api/
+    RewriteCond %{REQUEST_URI} ^/api/(.*)$
     RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
 
     # Statik dosyalar için frontend dist klasörüne bak
@@ -21,4 +21,20 @@
 
     # Tüm diğer istekleri frontend index.html'e yönlendir (SPA için)
     RewriteRule ^ frontend/mercan-frontend/dist/index.html [L]
+</IfModule>
+
+# PHP Ayarları
+<IfModule mod_php.c>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 64M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+</IfModule>
+
+# CORS Headers
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "https://mercandanismanlik.com"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+    Header set Access-Control-Allow-Credentials "true"
 </IfModule>
