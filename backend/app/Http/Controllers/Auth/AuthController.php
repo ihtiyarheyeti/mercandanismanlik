@@ -37,37 +37,16 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        Log::debug('Login isteği detayları', [
-            'tüm_request' => $request->all(),
-            'headers' => $request->headers->all(),
-            'session' => $request->session()->all(),
-            'cookies' => $request->cookies->all()
-        ]);
-
-        Log::info('Giriş isteği başladı', [
-            'email' => $request->email,
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'headers' => $request->headers->all()
-        ]);
-
         try {
             $credentials = $request->validate([
                 'email' => ['required', 'email'],
                 'password' => ['required'],
             ]);
 
-            Log::debug('Kimlik doğrulama başlıyor', [
-                'email' => $request->email,
-                'auth_check' => Auth::check(),
-                'session_id' => session()->getId()
-            ]);
-
-            if (!Auth::attempt($credentials)) {
-                Log::warning('Giriş başarısız - Kimlik bilgileri hatalı', [
+            if (!Auth::attempt($credentials, true)) {
+                Log::warning('Giriş başarısız', [
                     'email' => $request->email,
-                    'ip' => $request->ip(),
-                    'timestamp' => now()->toDateTimeString()
+                    'ip' => $request->ip()
                 ]);
 
                 return response()->json([
@@ -76,24 +55,12 @@ class AuthController extends Controller
             }
 
             $user = Auth::user();
-            Log::debug('Token oluşturuluyor', [
-                'user_id' => $user->id,
-                'auth_check' => Auth::check()
-            ]);
-
             $token = $user->createToken('auth-token')->plainTextToken;
-
-            Log::debug('Token oluşturuldu', [
-                'token_length' => strlen($token),
-                'user_id' => $user->id
-            ]);
 
             Log::info('Giriş başarılı', [
                 'user_id' => $user->id,
                 'email' => $user->email,
-                'ip' => $request->ip(),
-                'timestamp' => now()->toDateTimeString(),
-                'token_type' => 'Sanctum'
+                'ip' => $request->ip()
             ]);
 
             return response()->json([
@@ -108,20 +75,13 @@ class AuthController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Giriş hatası', [
-                'hata_mesaji' => $e->getMessage(),
-                'sinif' => get_class($e),
-                'dosya' => $e->getFile(),
-                'satir' => $e->getLine(),
-                'iz' => $e->getTraceAsString(),
-                'request' => [
-                    'email' => $request->email,
-                    'ip' => $request->ip(),
-                    'timestamp' => now()->toDateTimeString()
-                ]
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ]);
 
             return response()->json([
-                'message' => 'Bir hata oluştu',
+                'message' => 'Giriş yapılırken bir hata oluştu',
                 'error' => $e->getMessage()
             ], 500);
         }
