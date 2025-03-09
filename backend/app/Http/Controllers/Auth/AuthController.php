@@ -55,13 +55,19 @@ class AuthController extends Controller
                 
                 Log::info('Giriş başarılı', [
                     'user_id' => $user->id,
-                    'email' => $user->email
+                    'email' => $user->email,
+                    'token' => $token
                 ]);
 
                 return response()->json([
+                    'status' => 'success',
                     'access_token' => $token,
                     'token_type' => 'Bearer',
                     'user' => $user
+                ], 200, [
+                    'Content-Type' => 'application/json',
+                    'Access-Control-Allow-Origin' => 'https://mercandanismanlik.com',
+                    'Access-Control-Allow-Credentials' => 'true'
                 ]);
             }
 
@@ -70,8 +76,11 @@ class AuthController extends Controller
             ]);
 
             return response()->json([
+                'status' => 'error',
                 'message' => 'Geçersiz kimlik bilgileri'
-            ], 401);
+            ], 401, [
+                'Content-Type' => 'application/json'
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Login hatası', [
@@ -80,9 +89,12 @@ class AuthController extends Controller
             ]);
 
             return response()->json([
+                'status' => 'error',
                 'message' => 'Giriş işlemi sırasında bir hata oluştu',
                 'error' => $e->getMessage()
-            ], 500);
+            ], 500, [
+                'Content-Type' => 'application/json'
+            ]);
         }
     }
 

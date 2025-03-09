@@ -20,9 +20,7 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'http://localhost:3000',
-        'https://mercandanismanlik.com',
-        'https://www.mercandanismanlik.com'
+        'https://mercandanismanlik.com'
     ],
 
     'allowed_origins_patterns' => [],
