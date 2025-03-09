@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -36,25 +37,53 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+        Log::info('Login isteği alındı', [
+            'email' => $request->email,
+            'headers' => $request->headers->all(),
+            'ip' => $request->ip()
         ]);
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            throw ValidationException::withMessages([
-                'email' => ['Verilen kimlik bilgileri kayıtlarımızla eşleşmiyor.'],
+        try {
+            $credentials = $request->validate([
+                'email' => ['required', 'email'],
+                'password' => ['required'],
             ]);
+
+            if (Auth::attempt($credentials)) {
+                $user = Auth::user();
+                $token = $user->createToken('auth-token')->plainTextToken;
+                
+                Log::info('Giriş başarılı', [
+                    'user_id' => $user->id,
+                    'email' => $user->email
+                ]);
+
+                return response()->json([
+                    'access_token' => $token,
+                    'token_type' => 'Bearer',
+                    'user' => $user
+                ]);
+            }
+
+            Log::warning('Giriş başarısız - Kimlik bilgileri hatalı', [
+                'email' => $request->email
+            ]);
+
+            return response()->json([
+                'message' => 'Geçersiz kimlik bilgileri'
+            ], 401);
+
+        } catch (\Exception $e) {
+            Log::error('Login hatası', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Giriş işlemi sırasında bir hata oluştu',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $user = User::where('email', $request->email)->firstOrFail();
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user
-        ]);
     }
 
     public function logout(Request $request)
