@@ -74,70 +74,23 @@ const handleLogin = async () => {
   error.value = '';
 
   try {
-    console.log('Login isteği başlıyor:', {
-      email: email.value,
-      url: import.meta.env.VITE_API_URL + '/api/login'
-    });
-
     const response = await api.post('/login', {
       email: email.value,
       password: password.value
     });
 
-    console.log('Login yanıtı alındı:', {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-      data: response.data,
-      responseType: typeof response.data
-    });
-
-    // Response'un geçerli olup olmadığını kontrol et
-    if (!response.data) {
-      console.error('Yanıt boş:', response);
-      throw new Error('Sunucudan yanıt alınamadı');
-    }
-
-    // Response tipini kontrol et
-    if (typeof response.data === 'string') {
-      console.error('Yanıt string tipinde:', response.data);
-      throw new Error('Sunucudan geçersiz yanıt formatı alındı');
-    }
-
-    // Status kontrolü
-    if (response.data.status === 'error') {
-      console.error('Sunucu hatası:', response.data);
-      throw new Error(response.data.message || 'Giriş işlemi başarısız');
-    }
-
     // Token kontrolü
-    if (!response.data.access_token) {
-      console.error('Token bulunamadı:', response.data);
-      throw new Error('Token bilgisi bulunamadı');
+    if (!response.data?.access_token) {
+      throw new Error('Giriş başarısız: Token alınamadı');
     }
 
-    console.log('Token alındı, yönlendirme yapılıyor');
-    
     // Token'ı kaydet ve yönlendir
     localStorage.setItem('token', response.data.access_token);
     await router.push('/admin');
 
   } catch (err: any) {
-    console.error('Login hatası:', {
-      message: err.message,
-      response: err.response,
-      request: err.request,
-      config: err.config,
-      stack: err.stack
-    });
-    
-    if (err.response?.data?.message) {
-      error.value = err.response.data.message;
-    } else if (err.message) {
-      error.value = err.message;
-    } else {
-      error.value = 'Giriş yapılırken bir hata oluştu';
-    }
+    console.error('Login hatası:', err);
+    error.value = err.response?.data?.message || err.message || 'Giriş yapılırken bir hata oluştu';
   } finally {
     loading.value = false;
   }
