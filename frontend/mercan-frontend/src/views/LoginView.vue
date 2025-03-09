@@ -79,17 +79,27 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value
     })
-    console.log('Login response:', response.data)
+    console.log('Login response:', response)
+    console.log('Response data:', response.data)
+    console.log('Response status:', response.status)
+    console.log('Response headers:', response.headers)
 
-    if (response.data.access_token) {
+    if (response.data && response.data.access_token) {
+      console.log('Token alındı:', response.data.access_token)
       localStorage.setItem('token', response.data.access_token)
       await router.push('/admin')
     } else {
+      console.log('Response data içeriği:', response.data)
       error.value = 'Sunucudan geçerli bir token alınamadı'
-      console.error('Token alınamadı:', response.data)
+      console.error('Token alınamadı. Response:', response)
     }
   } catch (err: any) {
-    console.error('Login hatası:', err)
+    console.error('Login hatası detayları:', {
+      message: err.message,
+      response: err.response,
+      request: err.request,
+      config: err.config
+    })
     if (err.response?.data?.errors?.email) {
       error.value = err.response.data.errors.email[0]
     } else if (err.response?.data?.message) {

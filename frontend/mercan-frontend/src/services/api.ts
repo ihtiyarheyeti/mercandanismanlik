@@ -29,11 +29,28 @@ api.interceptors.request.use(async config => {
 // Response interceptor
 api.interceptors.response.use(
   response => {
-    console.log('API Response:', response.data)
+    console.log('API Response Details:', {
+      url: response.config.url,
+      method: response.config.method,
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+      data: response.data
+    })
     return response
   },
   error => {
-    console.error('API Error:', error.response?.data || error.message)
+    console.error('API Error Details:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      message: error.message,
+      response: {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      },
+      request: error.request
+    })
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
       window.location.href = '/login'
