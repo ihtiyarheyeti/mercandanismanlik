@@ -48,41 +48,35 @@ class AuthController extends Controller
                 'password' => ['required'],
             ]);
 
-            if (Auth::attempt($credentials)) {
-                $user = Auth::user();
-                $token = $user->createToken('auth-token')->plainTextToken;
-
-                Log::info('Login başarılı', [
-                    'user_id' => $user->id,
-                    'email' => $user->email
+            if (!Auth::attempt($credentials)) {
+                Log::warning('Login başarısız - Kimlik bilgileri hatalı', [
+                    'email' => $request->email
                 ]);
 
                 return response()->json([
-                    'status' => 'success',
-                    'message' => 'Giriş başarılı',
-                    'access_token' => $token,
-                    'token_type' => 'Bearer',
-                    'user' => [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'email' => $user->email
-                    ]
-                ], 200, [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json'
-                ]);
+                    'status' => 'error',
+                    'message' => 'E-posta veya şifre hatalı'
+                ], 401);
             }
 
-            Log::warning('Login başarısız - Kimlik bilgileri hatalı', [
-                'email' => $request->email
+            $user = Auth::user();
+            $token = $user->createToken('auth-token')->plainTextToken;
+
+            Log::info('Login başarılı', [
+                'user_id' => $user->id,
+                'email' => $user->email
             ]);
 
             return response()->json([
-                'status' => 'error',
-                'message' => 'E-posta veya şifre hatalı'
-            ], 401, [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
+                'status' => 'success',
+                'message' => 'Giriş başarılı',
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email
+                ]
             ]);
 
         } catch (\Exception $e) {
@@ -95,10 +89,7 @@ class AuthController extends Controller
                 'status' => 'error',
                 'message' => 'Bir hata oluştu',
                 'error' => $e->getMessage()
-            ], 500, [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
-            ]);
+            ], 500);
         }
     }
 

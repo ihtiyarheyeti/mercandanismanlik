@@ -74,19 +74,18 @@ const handleLogin = async () => {
   error.value = '';
 
   try {
-    const response = await api.post('/login', {
+    const response = await api.post('/api/login', {
       email: email.value,
       password: password.value
     });
 
     // Token kontrolü
-    if (!response.data?.access_token) {
-      throw new Error('Giriş başarısız: Token alınamadı');
+    if (response.data?.status === 'success' && response.data?.access_token) {
+      localStorage.setItem('token', response.data.access_token);
+      await router.push('/admin');
+    } else {
+      throw new Error(response.data?.message || 'Giriş başarısız: Token alınamadı');
     }
-
-    // Token'ı kaydet ve yönlendir
-    localStorage.setItem('token', response.data.access_token);
-    await router.push('/admin');
 
   } catch (err: any) {
     console.error('Login hatası:', err);
