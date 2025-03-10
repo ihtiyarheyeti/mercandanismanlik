@@ -1,5 +1,5 @@
-# Ana dizin için .htaccess
-<IfModule mod_rewrite.c>
+# LiteSpeed için ana .htaccess
+<IfModule Litespeed>
     RewriteEngine On
     RewriteBase /
     
@@ -20,46 +20,84 @@
     RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
     RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
 
-    # Tüm diğer istekleri index.html'e yönlendir
+    # Tüm diğer istekleri index.html'e yönlendir (SPA için)
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ frontend/mercan-frontend/dist/index.html [L]
+
+    # LiteSpeed Cache ayarları
+    CacheEnable public /frontend/mercan-frontend/dist
+    CacheDisable public /api/
+    CacheDisable public /sanctum/
+    
+    # Cache-Control başlıkları
+    <FilesMatch "\.(html|htm)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+    </FilesMatch>
+    
+    <FilesMatch "\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
 </IfModule>
 
 # MIME Types
 <IfModule mod_mime.c>
-    RemoveType .js .mjs .css
-    AddType application/javascript .js
-    AddType application/javascript .mjs
+    AddType application/javascript .js .mjs
     AddType text/css .css
     AddType image/svg+xml .svg
     AddType application/font-woff .woff
     AddType application/font-woff2 .woff2
-    AddType image/x-icon .ico
 </IfModule>
 
-# PHP Ayarları
+# Güvenlik Başlıkları
+<IfModule mod_headers.c>
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    
+    # CORS Headers
+    Header always set Access-Control-Allow-Origin "https://mercandanismanlik.com"
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header always set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
+    Header always set Access-Control-Allow-Credentials "true"
+    
+    # CSP Header
+    Header always set Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:; font-src 'self' data: https:;"
+</IfModule>
+
+# Sıkıştırma
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json
+    BrowserMatch ^Mozilla/4 gzip-only-text/html
+    BrowserMatch ^Mozilla/4\.0[678] no-gzip
+    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+</IfModule>
+
+# Kötü niyetli istekleri engelle
+<IfModule mod_rewrite.c>
+    # SQL injection koruması
+    RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2})
+    RewriteRule ^(.*)$ index.php [F,L]
+    
+    # Kötü bot koruması
+    RewriteCond %{HTTP_USER_AGENT} ^$ [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^(java|curl|wget).* [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} ^.*(winhttp|HTTrack|clshttp|archiver|loader|email|harvest|extract|grab|miner).* [NC]
+    RewriteRule .* - [F,L]
+</IfModule>
+
+# PHP ayarları
 <IfModule mod_php.c>
     php_value upload_max_filesize 64M
     php_value post_max_size 64M
     php_value max_execution_time 300
     php_value max_input_time 300
-</IfModule>
-
-# CORS Headers
-<IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "https://mercandanismanlik.com"
-    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-    Header set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
-    Header set Access-Control-Allow-Credentials "true"
-</IfModule>
-
-# Güvenlik Başlıkları
-<IfModule mod_headers.c>
-    Header set X-XSS-Protection "1; mode=block"
-    Header set X-Frame-Options "SAMEORIGIN"
-    Header set X-Content-Type-Options "nosniff"
-    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    php_flag display_errors off
+    php_flag log_errors on
 </IfModule>
 
 # Önbellekleme
@@ -73,11 +111,6 @@
     ExpiresByType image/gif "access plus 1 year"
     ExpiresByType image/svg+xml "access plus 1 year"
     ExpiresByType image/x-icon "access plus 1 year"
-</IfModule>
-
-# Sıkıştırma
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript text/javascript application/json
 </IfModule>
 
 # DirectoryIndex
