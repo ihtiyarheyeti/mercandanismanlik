@@ -48,9 +48,8 @@
           {{ error }}
         </div>
 
-        <!-- Debug Bilgileri -->
-        <div v-if="debugInfo" class="mt-4 p-4 bg-black text-green-400 rounded-lg overflow-auto text-xs font-mono" style="max-height: 200px;">
-          <pre>{{ debugInfo }}</pre>
+        <div v-if="debugMessage" class="mt-4 p-4 bg-black text-green-400 rounded-lg overflow-auto text-xs font-mono">
+          {{ debugMessage }}
         </div>
       </form>
     </div>
@@ -60,93 +59,63 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 const router = useRouter()
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
-const debugInfo = ref('')
-
-const log = (message: string, data?: any) => {
-  const timestamp = new Date().toISOString()
-  const logMessage = `[${timestamp}] ${message}\n${data ? JSON.stringify(data, null, 2) : ''}\n\n`
-  debugInfo.value += logMessage
-  console.log(message, data)
-}
+const debugMessage = ref('')
 
 const handleLogin = async () => {
   loading.value = true
   error.value = ''
-  debugInfo.value = ''
-
-  log('Login işlemi başlatılıyor...', { email: email.value })
+  debugMessage.value = 'Giriş denemesi başlatıldı...'
+  console.log('Giriş denemesi başlatıldı')
 
   try {
-    // CSRF token isteği
-    log('CSRF token isteği yapılıyor...')
-    const csrfResponse = await fetch('https://mercandanismanlik.com/sanctum/csrf-cookie', {
-      method: 'GET',
-      credentials: 'include',
+    console.log('CSRF token isteği yapılıyor')
+    debugMessage.value += '\nCSRF token isteği yapılıyor...'
+    
+    const csrfResponse = await axios.get('https://mercandanismanlik.com/sanctum/csrf-cookie', {
+      withCredentials: true
+    })
+    
+    console.log('CSRF response:', csrfResponse)
+    debugMessage.value += '\nCSRF token alındı'
+
+    console.log('Login isteği yapılıyor')
+    debugMessage.value += '\nLogin isteği yapılıyor...'
+    
+    const loginResponse = await axios.post('https://mercandanismanlik.com/api/login', {
+      email: email.value,
+      password: password.value
+    }, {
+      withCredentials: true,
       headers: {
+        'Content-Type': 'application/json',
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest'
       }
     })
 
-    log('CSRF response alındı:', {
-      status: csrfResponse.status,
-      ok: csrfResponse.ok,
-      headers: Object.fromEntries(csrfResponse.headers.entries())
-    })
+    console.log('Login response:', loginResponse)
+    debugMessage.value += '\nLogin yanıtı alındı'
 
-    if (!csrfResponse.ok) {
-      throw new Error(`CSRF token alınamadı: ${csrfResponse.status} ${csrfResponse.statusText}`)
-    }
-
-    // Login isteği
-    log('Login isteği yapılıyor...')
-    const loginResponse = await fetch('https://mercandanismanlik.com/api/login', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      body: JSON.stringify({
-        email: email.value,
-        password: password.value
-      })
-    })
-
-    const responseData = await loginResponse.json()
-    
-    log('Login response alındı:', {
-      status: loginResponse.status,
-      ok: loginResponse.ok,
-      headers: Object.fromEntries(loginResponse.headers.entries()),
-      data: responseData
-    })
-
-    if (!loginResponse.ok) {
-      throw new Error(responseData.message || 'Login başarısız')
-    }
-
-    if (responseData.access_token) {
-      localStorage.setItem('token', responseData.access_token)
-      log('Token başarıyla alındı ve kaydedildi')
+    if (loginResponse.data.access_token) {
+      localStorage.setItem('token', loginResponse.data.access_token)
+      debugMessage.value += '\nToken kaydedildi'
+      console.log('Token kaydedildi')
       await router.push('/admin')
     } else {
       throw new Error('Token alınamadı')
     }
 
   } catch (err: any) {
-    log('Hata oluştu:', {
-      message: err.message,
-      stack: err.stack
-    })
-    error.value = err.message || 'Giriş yapılırken bir hata oluştu'
+    console.error('Login hatası:', err)
+    debugMessage.value += `\nHata: ${err.message}`
+    error.value = err.response?.data?.message || err.message || 'Giriş yapılırken bir hata oluştu'
   } finally {
     loading.value = false
   }
