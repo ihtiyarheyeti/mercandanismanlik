@@ -15,15 +15,10 @@
     RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
     RewriteRule ^sanctum/csrf-cookie$ backend/public/index.php [L,QSA]
 
-    # Assets dosyaları için
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
-    RewriteRule ^assets/(.*)$ frontend/mercan-frontend/dist/assets/$1 [L]
-
-    # Tüm diğer istekleri index.html'e yönlendir
+    # Frontend için tüm istekleri index.html'e yönlendir
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ frontend/mercan-frontend/dist/index.html [L]
+    RewriteRule ^(.*)$ /frontend/mercan-frontend/dist/index.html [L]
 </IfModule>
 
 # MIME Types
