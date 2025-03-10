@@ -8,18 +8,14 @@ RewriteCond %{HTTP_HOST} ^www\. [NC]
 RewriteCond %{HTTP_HOST} ^(?:www\.)?(.+)$ [NC]
 RewriteRule ^ https://%1%{REQUEST_URI} [L,NE,R=301]
 
-# API istekleri için backend'e yönlendir
-RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
-RewriteRule ^sanctum/csrf-cookie$ backend/public/index.php [L,QSA]
+# Backend istekleri için
+RewriteRule ^(api|sanctum)(/.*)?$ backend/public/index.php [L,QSA]
 
 # Statik dosyalar için
-RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
 RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
 
-# SPA yönlendirmesi - tüm diğer istekler için
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
+# SPA yönlendirmesi - tüm istekleri index.html'e yönlendir
 RewriteRule ^(.*)$ frontend/mercan-frontend/dist/index.html [L]
 
 # Güvenlik Başlıkları
