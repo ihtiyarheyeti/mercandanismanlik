@@ -15,10 +15,15 @@
     RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
     RewriteRule ^sanctum/csrf-cookie$ backend/public/index.php [L,QSA]
 
-    # Frontend için tüm istekleri index.html'e yönlendir
+    # Statik dosyalar için kontrol
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
+    RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
+
+    # Tüm diğer istekleri index.html'e yönlendir
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ /frontend/mercan-frontend/dist/index.html [L]
+    RewriteRule ^(.*)$ frontend/mercan-frontend/dist/index.html [L]
 </IfModule>
 
 # MIME Types
@@ -47,6 +52,14 @@
     Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
     Header set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
     Header set Access-Control-Allow-Credentials "true"
+</IfModule>
+
+# Güvenlik Başlıkları
+<IfModule mod_headers.c>
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
 # Önbellekleme
