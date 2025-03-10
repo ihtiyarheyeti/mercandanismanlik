@@ -47,10 +47,6 @@
         <div v-if="error" class="text-red-600 text-center text-sm mt-2">
           {{ error }}
         </div>
-
-        <div v-if="debugMessage" class="mt-4 p-4 bg-black text-green-400 rounded-lg overflow-auto text-xs font-mono">
-          {{ debugMessage }}
-        </div>
       </form>
     </div>
   </div>
@@ -59,62 +55,36 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import api from '@/services/api'
 
 const router = useRouter()
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
-const debugMessage = ref('')
 
 const handleLogin = async () => {
   loading.value = true
   error.value = ''
-  debugMessage.value = 'Giriş denemesi başlatıldı...'
-  console.log('Giriş denemesi başlatıldı')
 
   try {
-    console.log('CSRF token isteği yapılıyor')
-    debugMessage.value += '\nCSRF token isteği yapılıyor...'
+    // CSRF token isteği
+    await api.get('/sanctum/csrf-cookie')
     
-    const csrfResponse = await axios.get('https://mercandanismanlik.com/sanctum/csrf-cookie', {
-      withCredentials: true
-    })
-    
-    console.log('CSRF response:', csrfResponse)
-    debugMessage.value += '\nCSRF token alındı'
-
-    console.log('Login isteği yapılıyor')
-    debugMessage.value += '\nLogin isteği yapılıyor...'
-    
-    const loginResponse = await axios.post('https://mercandanismanlik.com/api/login', {
+    // Login isteği
+    const response = await api.post('/api/login', {
       email: email.value,
       password: password.value
-    }, {
-      withCredentials: true,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      }
     })
 
-    console.log('Login response:', loginResponse)
-    debugMessage.value += '\nLogin yanıtı alındı'
-
-    if (loginResponse.data.access_token) {
-      localStorage.setItem('token', loginResponse.data.access_token)
-      debugMessage.value += '\nToken kaydedildi'
-      console.log('Token kaydedildi')
+    if (response.data.access_token) {
+      localStorage.setItem('token', response.data.access_token)
       await router.push('/admin')
     } else {
       throw new Error('Token alınamadı')
     }
-
   } catch (err: any) {
     console.error('Login hatası:', err)
-    debugMessage.value += `\nHata: ${err.message}`
     error.value = err.response?.data?.message || err.message || 'Giriş yapılırken bir hata oluştu'
   } finally {
     loading.value = false
