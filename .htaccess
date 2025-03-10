@@ -15,15 +15,17 @@
     RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
     RewriteRule ^sanctum/csrf-cookie$ backend/public/index.php [L,QSA]
 
+    # Eğer dosya veya dizin varsa direkt serve et
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
     # Frontend dist klasöründeki statik dosyalar için
-    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
     RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
 
-    # Admin ve diğer frontend rotaları için
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(admin|login|register|.*)?$ frontend/mercan-frontend/dist/index.html [L]
+    # Tüm diğer istekleri frontend index.html'e yönlendir
+    RewriteRule ^ frontend/mercan-frontend/dist/index.html [L]
 </IfModule>
 
 # MIME Types
@@ -57,30 +59,19 @@
 # Önbellekleme
 <IfModule mod_expires.c>
     ExpiresActive On
-    ExpiresByType application/javascript "access plus 1 year"
-    ExpiresByType text/javascript "access plus 1 year"
+    ExpiresByType text/html "access plus 0 seconds"
     ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
     ExpiresByType image/jpeg "access plus 1 year"
     ExpiresByType image/png "access plus 1 year"
     ExpiresByType image/gif "access plus 1 year"
     ExpiresByType image/svg+xml "access plus 1 year"
     ExpiresByType image/x-icon "access plus 1 year"
-    ExpiresByType application/font-woff "access plus 1 year"
-    ExpiresByType application/font-woff2 "access plus 1 year"
 </IfModule>
 
 # Sıkıştırma
 <IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript text/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascript application/json
-    
-    # Eski tarayıcılar için
-    BrowserMatch ^Mozilla/4 gzip-only-text/html
-    BrowserMatch ^Mozilla/4\.0[678] no-gzip
-    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
-    
-    # Vary header
-    Header append Vary User-Agent env=!dont-vary
-    Header append Vary Accept-Encoding
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript text/javascript application/json
 </IfModule>
 
 # DirectoryIndex
