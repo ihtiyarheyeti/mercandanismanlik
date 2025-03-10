@@ -8,18 +8,21 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
-# API istekleri için
+# API ve Sanctum istekleri için
 RewriteRule ^(api|sanctum)(/.*)?$ backend/public/index.php [L,QSA]
 
-# Statik dosyalar için
+# Frontend asset dosyaları için
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_URI} ^/assets/
-RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
+RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$
+RewriteRule ^(.*)$ frontend/mercan-frontend/dist/assets/$1 [L]
 
-# Tüm istekleri index.php'ye yönlendir
+# Frontend rotaları için
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.php [L,QSA]
+RewriteCond %{REQUEST_URI} !^/backend
+RewriteCond %{REQUEST_URI} !^/api
+RewriteCond %{REQUEST_URI} !^/sanctum
+RewriteRule ^ frontend/mercan-frontend/dist/index.html [L]
 
 # CORS Headers
 Header set Access-Control-Allow-Origin "https://mercandanismanlik.com"
