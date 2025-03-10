@@ -20,10 +20,10 @@
     RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
     RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
 
-    # Tüm diğer istekleri frontend index.html'e yönlendir
+    # Admin ve diğer frontend rotaları için
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^ index.php [L]
+    RewriteRule ^(admin|login|register|.*)?$ frontend/mercan-frontend/dist/index.html [L]
 </IfModule>
 
 # MIME Types
