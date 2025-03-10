@@ -16,8 +16,8 @@ class AdminUserSeeder extends Seeder
     {
         User::create([
             'name' => 'Admin',
-            'email' => 'admin@mercan.com',
-            'password' => Hash::make('admin123'),
+            'email' => 'admin@mercandanismanlik.com',
+            'password' => Hash::make('Mercan2024!'),
             'email_verified_at' => now(),
         ]);
     }
