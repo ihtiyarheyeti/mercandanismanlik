@@ -1,58 +1,26 @@
-# LiteSpeed için ana .htaccess
-<IfModule Litespeed>
-    RewriteEngine On
-    RewriteBase /
+# Ana yönlendirme kuralları
+RewriteEngine On
+RewriteBase /
 
-    # Force HTTPS
-    RewriteCond %{HTTPS} off
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# SSL ve www yönlendirmeleri
+RewriteCond %{HTTPS} off [OR]
+RewriteCond %{HTTP_HOST} ^www\. [NC]
+RewriteCond %{HTTP_HOST} ^(?:www\.)?(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [L,NE,R=301]
 
-    # www'suz yönlendirme
-    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-    RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+# API istekleri için backend'e yönlendir
+RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
+RewriteRule ^sanctum/csrf-cookie$ backend/public/index.php [L,QSA]
 
-    # Cloudflare için özel işlemler
-    RewriteCond %{HTTP:CF-Visitor} '"scheme":"http"'
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# Statik dosyalar için
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
+RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
 
-    # Cloudflare CDN için özel yönlendirmeler
-    RewriteCond %{REQUEST_URI} ^/cdn-cgi/
-    RewriteRule ^(.*)$ - [L,QSA]
-
-    # API istekleri için backend'e yönlendir
-    RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
-    RewriteRule ^sanctum/csrf-cookie$ backend/public/index.php [L,QSA]
-
-    # Statik dosyalar için
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
-    RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
-
-    # SPA yönlendirmesi
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} !^/api/
-    RewriteCond %{REQUEST_URI} !^/sanctum/
-    RewriteCond %{REQUEST_URI} !^/cdn-cgi/
-    RewriteRule ^(.*)$ /frontend/mercan-frontend/dist/index.html [L]
-
-    # LiteSpeed Cache ayarları
-    CacheEnable public /frontend/mercan-frontend/dist
-    CacheDisable public /api/
-    CacheDisable public /sanctum/
-    CacheDisable public /cdn-cgi/
-
-    # Cache-Control başlıkları
-    <FilesMatch "\.(html|htm)$">
-        Header set Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
-        Header set Pragma "no-cache"
-        Header set Expires "0"
-    </FilesMatch>
-
-    <FilesMatch "\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$">
-        Header set Cache-Control "public, max-age=31536000, immutable"
-    </FilesMatch>
-</IfModule>
+# SPA yönlendirmesi - tüm diğer istekler için
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ frontend/mercan-frontend/dist/index.html [L]
 
 # Güvenlik Başlıkları
 <IfModule mod_headers.c>
@@ -67,40 +35,18 @@
     Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
     Header always set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization, X-CSRF-TOKEN"
     Header always set Access-Control-Allow-Credentials "true"
-    
-    # CSP Header - Cloudflare için güncellendi
-    Header always set Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval' *.cloudflare.com; img-src 'self' data: https: *.cloudflare.com; font-src 'self' data: https:; connect-src 'self' https: wss: *.cloudflare.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.cloudflare.com; style-src 'self' 'unsafe-inline' *.cloudflare.com;"
 </IfModule>
 
-# Cloudflare için özel ayarlar
-<IfModule mod_headers.c>
-    # Edge Cache TTL
-    Header set Edge-Control "cache-maxage=3600"
-    
-    # Browser Cache TTL
-    <FilesMatch "index\.html$">
-        Header set Cache-Control "public, no-cache, must-revalidate, proxy-revalidate, max-age=0"
-    </FilesMatch>
-</IfModule>
+# Önbellekleme
+<FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+</FilesMatch>
+
+<FilesMatch "\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
 
 # Error Documents
 ErrorDocument 404 /frontend/mercan-frontend/dist/index.html
-ErrorDocument 403 /frontend/mercan-frontend/dist/index.html
-
-# PHP ayarları
-<IfModule mod_php.c>
-    php_value upload_max_filesize 64M
-    php_value post_max_size 64M
-    php_value max_execution_time 300
-    php_value max_input_time 300
-    php_flag display_errors off
-    php_flag log_errors on
-</IfModule>
-
-# Sıkıştırma
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json
-    BrowserMatch ^Mozilla/4 gzip-only-text/html
-    BrowserMatch ^Mozilla/4\.0[678] no-gzip
-    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
-</IfModule>
