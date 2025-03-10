@@ -44,13 +44,14 @@
           </button>
         </div>
 
-        <div v-if="error" class="text-red-600 text-center text-sm">
+        <div v-if="error" class="text-red-600 text-center text-sm mt-2">
           {{ error }}
         </div>
 
-        <pre v-if="debugInfo" class="mt-4 p-4 bg-gray-800 text-white rounded overflow-auto text-xs">
-          {{ debugInfo }}
-        </pre>
+        <!-- Debug Bilgileri -->
+        <div v-if="debugInfo" class="mt-4 p-4 bg-black text-green-400 rounded-lg overflow-auto text-xs font-mono" style="max-height: 200px;">
+          <pre>{{ debugInfo }}</pre>
+        </div>
       </form>
     </div>
   </div>
@@ -59,7 +60,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
 
 const router = useRouter()
 const email = ref('')
@@ -80,34 +80,39 @@ const handleLogin = async () => {
   error.value = ''
   debugInfo.value = ''
 
-  log('Login başlıyor...', { email: email.value })
+  log('Login işlemi başlatılıyor...', { email: email.value })
 
   try {
+    // CSRF token isteği
     log('CSRF token isteği yapılıyor...')
-    
     const csrfResponse = await fetch('https://mercandanismanlik.com/sanctum/csrf-cookie', {
       method: 'GET',
-      credentials: 'include'
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
     })
-    
-    log('CSRF response:', {
+
+    log('CSRF response alındı:', {
       status: csrfResponse.status,
       ok: csrfResponse.ok,
       headers: Object.fromEntries(csrfResponse.headers.entries())
     })
 
     if (!csrfResponse.ok) {
-      throw new Error('CSRF token alınamadı')
+      throw new Error(`CSRF token alınamadı: ${csrfResponse.status} ${csrfResponse.statusText}`)
     }
 
+    // Login isteği
     log('Login isteği yapılıyor...')
-    
     const loginResponse = await fetch('https://mercandanismanlik.com/api/login', {
       method: 'POST',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
       },
       body: JSON.stringify({
         email: email.value,
@@ -115,28 +120,32 @@ const handleLogin = async () => {
       })
     })
 
-    const data = await loginResponse.json()
+    const responseData = await loginResponse.json()
     
-    log('Login response:', {
+    log('Login response alındı:', {
       status: loginResponse.status,
       ok: loginResponse.ok,
       headers: Object.fromEntries(loginResponse.headers.entries()),
-      data
+      data: responseData
     })
 
     if (!loginResponse.ok) {
-      throw new Error(data.message || 'Login başarısız')
+      throw new Error(responseData.message || 'Login başarısız')
     }
 
-    if (data.access_token) {
-      localStorage.setItem('token', data.access_token)
+    if (responseData.access_token) {
+      localStorage.setItem('token', responseData.access_token)
+      log('Token başarıyla alındı ve kaydedildi')
       await router.push('/admin')
     } else {
       throw new Error('Token alınamadı')
     }
 
   } catch (err: any) {
-    log('Hata oluştu:', err)
+    log('Hata oluştu:', {
+      message: err.message,
+      stack: err.stack
+    })
     error.value = err.message || 'Giriş yapılırken bir hata oluştu'
   } finally {
     loading.value = false
