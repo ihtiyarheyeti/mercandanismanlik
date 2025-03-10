@@ -61,6 +61,11 @@
         Options -MultiViews -Indexes
     </IfModule>
 
+    # PHP-FPM Handler
+    <FilesMatch \.php$>
+        SetHandler "proxy:unix:/var/run/php/php8.3-fpm.sock|fcgi://localhost"
+    </FilesMatch>
+
     RewriteEngine On
     RewriteBase /
 
@@ -90,6 +95,7 @@
     Header set X-Frame-Options "SAMEORIGIN"
     Header set Referrer-Policy "strict-origin-when-cross-origin"
     Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header set Content-Type "application/json"
     
     Header always set Access-Control-Allow-Origin "https://mercandanismanlik.com"
     Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
