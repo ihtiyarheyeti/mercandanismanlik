@@ -8,11 +8,11 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["node", "vite/client"],
+    "types": ["node", "vite/client", "vue3-particles"],
     "module": "ESNext",
     "moduleResolution": "Node",
     "allowJs": true,
     "target": "ESNext",
     "lib": ["ESNext", "DOM", "DOM.Iterable"]
   }
-}
+} 
