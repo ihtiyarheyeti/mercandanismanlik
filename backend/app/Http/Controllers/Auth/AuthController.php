@@ -37,40 +37,44 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // Gelen isteği logla
+        Log::info('Login isteği alındı', [
+            'email' => $request->email,
+            'headers' => $request->headers->all(),
+            'session_id' => $request->session()->getId(),
+            'cookies' => $request->cookies->all()
+        ]);
+
         try {
-            Log::info('Login isteği başladı', [
-                'email' => $request->email,
-                'headers' => $request->headers->all(),
-                'cookies' => $request->cookies->all()
-            ]);
-
             $credentials = $request->validate([
-                'email' => ['required', 'email'],
-                'password' => ['required'],
+                'email' => 'required|email',
+                'password' => 'required'
             ]);
 
-            if (!Auth::attempt($credentials)) {
-                Log::warning('Giriş başarısız - kimlik doğrulama hatası', [
-                    'email' => $request->email,
-                    'ip' => $request->ip()
-                ]);
-
-                return response()->json([
-                    'message' => 'E-posta veya şifre hatalı'
-                ], 401);
+            // Kullanıcı kontrolü
+            $user = User::where('email', $credentials['email'])->first();
+            if (!$user) {
+                Log::warning('Kullanıcı bulunamadı', ['email' => $credentials['email']]);
+                return response()->json(['message' => 'Kullanıcı bulunamadı'], 401);
             }
 
-            $user = Auth::user();
-            $token = $user->createToken('auth-token');
+            // Giriş denemesi
+            if (!Auth::attempt($credentials)) {
+                Log::warning('Şifre hatalı', ['email' => $credentials['email']]);
+                return response()->json(['message' => 'Şifre hatalı'], 401);
+            }
 
-            Log::info('Token oluşturuldu', [
+            // Token oluştur
+            $token = $user->createToken('auth-token')->plainTextToken;
+
+            Log::info('Login başarılı', [
                 'user_id' => $user->id,
-                'token' => $token->plainTextToken,
-                'abilities' => $token->accessToken->abilities ?? []
+                'email' => $user->email,
+                'token' => $token
             ]);
 
             return response()->json([
-                'access_token' => $token->plainTextToken,
+                'access_token' => $token,
                 'token_type' => 'Bearer',
                 'user' => [
                     'id' => $user->id,
@@ -81,19 +85,13 @@ class AuthController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Login hatası', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'request' => [
-                    'all' => $request->all(),
-                    'headers' => $request->headers->all(),
-                    'cookies' => $request->cookies->all()
-                ]
+                'request' => $request->all()
             ]);
 
             return response()->json([
-                'message' => 'Giriş yapılırken bir hata oluştu: ' . $e->getMessage()
+                'message' => 'Bir hata oluştu: ' . $e->getMessage()
             ], 500);
         }
     }

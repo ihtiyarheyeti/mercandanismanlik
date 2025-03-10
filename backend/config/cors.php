@@ -15,13 +15,11 @@ return [
     |
     */
 
-    'paths' => ['*', 'sanctum/csrf-cookie', 'api/*', 'login', 'logout', 'storage/*'],
+    'paths' => ['*', 'sanctum/csrf-cookie', 'api/*', 'login', 'logout'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        'https://mercandanismanlik.com'
-    ],
+    'allowed_origins' => ['https://mercandanismanlik.com'],
 
     'allowed_origins_patterns' => [],
 
