@@ -27,6 +27,10 @@ RewriteCond %{QUERY_STRING} (thumbs?(_editor|open)?|tim(thumb)?)\.php [NC,OR]
 RewriteCond %{QUERY_STRING} (\'|\")(.*)(drop|insert|md5|select|union) [NC]
 RewriteRule .* - [F]
 
+# Cloudflare CDN için özel yönlendirmeler
+RewriteCond %{REQUEST_URI} ^/cdn-cgi/
+RewriteRule ^(.*)$ - [L]
+
 # API istekleri için backend'e yönlendir
 RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
 RewriteRule ^sanctum/csrf-cookie$ backend/public/index.php [L,QSA]
@@ -36,11 +40,12 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
 RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
 
-# SPA yönlendirmesi - tüm istekleri index.html'e yönlendir
+# Vue Router için tüm yönlendirmeler
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/api
 RewriteCond %{REQUEST_URI} !^/sanctum
+RewriteCond %{REQUEST_URI} !^/cdn-cgi
 RewriteRule ^(.*)$ frontend/mercan-frontend/dist/index.html [L]
 
 # Güvenlik Başlıkları
@@ -57,8 +62,8 @@ RewriteRule ^(.*)$ frontend/mercan-frontend/dist/index.html [L]
     Header always set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization"
     Header always set Access-Control-Allow-Credentials "true"
     
-    # CSP Header
-    Header always set Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:; font-src 'self' data: https:;"
+    # CSP Header - Cloudflare için güncellendi
+    Header always set Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval' *.cloudflare.com; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https: wss:;"
 </IfModule>
 
 # Önbellekleme
@@ -68,6 +73,11 @@ RewriteRule ^(.*)$ frontend/mercan-frontend/dist/index.html [L]
 
 <FilesMatch "\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
+# Cloudflare için özel önbellek ayarları
+<FilesMatch "^(index\.html)?$">
+    Header set Cache-Control "public, no-cache, must-revalidate, proxy-revalidate, max-age=0"
 </FilesMatch>
 
 # Sıkıştırma
