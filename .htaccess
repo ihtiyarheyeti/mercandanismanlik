@@ -12,14 +12,10 @@
     RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
     # API istekleri için backend'e yönlendir
-    RewriteCond %{REQUEST_URI} ^/api/
     RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
+    RewriteRule ^sanctum/csrf-cookie$ backend/public/index.php [L,QSA]
 
-    # Sanctum CSRF token için
-    RewriteCond %{REQUEST_URI} ^/sanctum/csrf-cookie
-    RewriteRule ^(.*)$ backend/public/index.php [L,QSA]
-
-    # Frontend dist klasöründeki dosyalar için
+    # Frontend dist klasöründeki statik dosyalar için
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
     RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
@@ -27,7 +23,7 @@
     # Tüm diğer istekleri frontend index.html'e yönlendir
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^ frontend/mercan-frontend/dist/index.html [L]
+    RewriteRule ^ index.php [L]
 </IfModule>
 
 # MIME Types

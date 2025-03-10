@@ -5,7 +5,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // API istekleri için backend'e yönlendir
-if (strpos($_SERVER['REQUEST_URI'], '/api') === 0) {
+if (strpos($_SERVER['REQUEST_URI'], '/api') === 0 || strpos($_SERVER['REQUEST_URI'], '/sanctum/csrf-cookie') === 0) {
     require __DIR__ . '/backend/public/index.php';
     exit;
 }
