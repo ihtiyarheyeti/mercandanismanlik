@@ -11,51 +11,55 @@ ini_set('error_log', __DIR__ . '/php_errors.log');
 // Debug mesajlarını error_log'a yaz
 error_log("Request URI: " . $_SERVER['REQUEST_URI']);
 
-// API istekleri için backend'e yönlendir
-if (strpos($_SERVER['REQUEST_URI'], '/api') === 0 || strpos($_SERVER['REQUEST_URI'], '/sanctum/csrf-cookie') === 0) {
-    error_log("API isteği yönlendiriliyor");
+$requestUri = $_SERVER['REQUEST_URI'];
+
+// API istekleri için
+if (strpos($requestUri, '/api') === 0 || strpos($requestUri, '/sanctum') === 0) {
     require __DIR__ . '/backend/public/index.php';
     exit;
 }
 
-// Frontend dosyasını serve et
-$frontendPath = __DIR__ . '/frontend/mercan-frontend/dist/index.html';
-$requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$staticPath = __DIR__ . '/frontend/mercan-frontend/dist' . $requestPath;
+// Frontend statik dosyaları için
+$staticExtensions = ['js', 'css', 'png', 'jpg', 'jpeg', 'gif', 'ico', 'svg', 'woff', 'woff2'];
+$extension = pathinfo($requestUri, PATHINFO_EXTENSION);
 
-// Assets için kontrol
-if (strpos($requestPath, '/assets/') === 0) {
-    if (file_exists($staticPath)) {
-        $extension = pathinfo($staticPath, PATHINFO_EXTENSION);
-        $contentTypes = [
+if (in_array($extension, $staticExtensions)) {
+    $filePath = __DIR__ . '/frontend/mercan-frontend/dist' . $requestUri;
+    if (file_exists($filePath)) {
+        $mimeTypes = [
             'js' => 'application/javascript',
             'css' => 'text/css',
             'png' => 'image/png',
             'jpg' => 'image/jpeg',
             'jpeg' => 'image/jpeg',
             'gif' => 'image/gif',
-            'svg' => 'image/svg+xml',
             'ico' => 'image/x-icon',
+            'svg' => 'image/svg+xml',
             'woff' => 'application/font-woff',
             'woff2' => 'application/font-woff2'
         ];
         
-        if (isset($contentTypes[$extension])) {
-            header('Content-Type: ' . $contentTypes[$extension]);
+        if (isset($mimeTypes[$extension])) {
+            header('Content-Type: ' . $mimeTypes[$extension]);
         }
         
-        readfile($staticPath);
+        // Önbellek başlıkları
+        header('Cache-Control: public, max-age=31536000');
+        header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + 31536000));
+        
+        readfile($filePath);
         exit;
     }
 }
 
-// Frontend rotaları için index.html'i serve et
-if (file_exists($frontendPath)) {
+// Frontend index.html için
+$indexPath = __DIR__ . '/frontend/mercan-frontend/dist/index.html';
+if (file_exists($indexPath)) {
     header('Content-Type: text/html');
-    readfile($frontendPath);
-    exit;
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    readfile($indexPath);
 } else {
-    error_log("Frontend dosyası bulunamadı: " . $frontendPath);
     header("HTTP/1.0 404 Not Found");
     echo "Frontend dosyası bulunamadı";
 }

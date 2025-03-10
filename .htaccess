@@ -1,11 +1,4 @@
-# Temel ayarlar
-Options -MultiViews
-Options -Indexes
 RewriteEngine On
-
-# Temel PHP ayarları
-AddType application/x-httpd-php .php
-AddHandler application/x-httpd-php .php
 
 # SSL yönlendirmesi
 RewriteCond %{HTTPS} off
@@ -15,20 +8,16 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
-# API ve Sanctum istekleri için backend'e yönlendir
-RewriteCond %{REQUEST_URI} ^/(api|sanctum) [NC]
-RewriteRule ^(.*)$ backend/public/index.php [L,QSA]
+# Backend API istekleri için
+RewriteRule ^api(/.*)?$ backend/public/index.php [L,QSA]
+RewriteRule ^sanctum(/.*)?$ backend/public/index.php [L,QSA]
 
-# Frontend statik dosyaları için
+# Frontend için tüm istekleri index.html'e yönlendir
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$
-RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
-
-# Frontend için index.html'e yönlendir (SPA için)
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/(backend|api|sanctum) [NC]
-RewriteRule ^ frontend/mercan-frontend/dist/index.html [L]
+RewriteCond %{REQUEST_URI} !^/api
+RewriteCond %{REQUEST_URI} !^/sanctum
+RewriteCond %{REQUEST_URI} !^/backend
+RewriteRule ^(.*)$ /index.php [L]
 
 # CORS Headers
 Header always set Access-Control-Allow-Origin "https://mercandanismanlik.com"
