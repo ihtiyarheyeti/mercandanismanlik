@@ -61,11 +61,6 @@
         Options -MultiViews -Indexes
     </IfModule>
 
-    # PHP-FPM Handler
-    <FilesMatch \.php$>
-        SetHandler "proxy:unix:/var/run/php/php8.3-fpm.sock|fcgi://localhost"
-    </FilesMatch>
-
     RewriteEngine On
     RewriteBase /
 
@@ -82,10 +77,6 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
-
-    # OPTIONS isteklerini hemen yanıtla
-    RewriteCond %{REQUEST_METHOD} OPTIONS
-    RewriteRule ^(.*)$ $1 [R=200,L]
 </IfModule>
 
 # CORS ve Güvenlik Başlıkları
@@ -95,18 +86,18 @@
     Header set X-Frame-Options "SAMEORIGIN"
     Header set Referrer-Policy "strict-origin-when-cross-origin"
     Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
-    Header set Content-Type "application/json"
     
-    Header always set Access-Control-Allow-Origin "https://mercandanismanlik.com"
-    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-    Header always set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization, X-CSRF-TOKEN"
-    Header always set Access-Control-Allow-Credentials "true"
+    # CORS Headers - Sadece OPTIONS istekleri için
+    <If "%{REQUEST_METHOD} == 'OPTIONS'">
+        Header always set Access-Control-Allow-Origin "https://mercandanismanlik.com"
+        Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Header always set Access-Control-Allow-Headers "X-Requested-With, Content-Type, X-Token-Auth, Authorization, X-CSRF-TOKEN, X-XSRF-TOKEN"
+        Header always set Access-Control-Allow-Credentials "true"
+        Header always set Access-Control-Expose-Headers "X-XSRF-TOKEN"
+    </If>
 </IfModule>
 
-# PHP değerlerini ayarla
-<IfModule mod_php8.c>
-    php_value upload_max_filesize 64M
-    php_value post_max_size 64M
-    php_value max_execution_time 300
-    php_value max_input_time 300
-</IfModule>
+# PHP Handler
+<FilesMatch "\.php$">
+    SetHandler "proxy:unix:/var/run/php/php8.3-fpm.sock|fcgi://localhost"
+</FilesMatch>
