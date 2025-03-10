@@ -1,53 +1,47 @@
 # LiteSpeed için ana .htaccess
-<IfModule Litespeed>
-    RewriteEngine On
-    RewriteBase /
-    
-    # SSL Yönlendirmesi
-    RewriteCond %{HTTPS} off
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+RewriteEngine On
+RewriteBase /
 
-    # www olmadan yönlendirme
-    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-    RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+# SSL Yönlendirmesi
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-    # API istekleri için backend'e yönlendir
-    RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
-    RewriteRule ^sanctum/csrf-cookie$ backend/public/index.php [L,QSA]
+# www olmadan yönlendirme
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
-    # Statik dosyalar için kontrol
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
-    RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
+# Bot ve kötü niyetli istekleri engelle
+RewriteCond %{HTTP_USER_AGENT} (bot|spider|crawler|curl|wget|slurp|mediapartners) [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} (^$|^mozilla/\d\.\d$) [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} (winhttp|HTTrack|clshttp|archiver|loader|email|harvest|extract|grab|miner) [NC,OR]
+RewriteCond %{QUERY_STRING} (eval\() [NC,OR]
+RewriteCond %{QUERY_STRING} (127\.0\.0\.1) [NC,OR]
+RewriteCond %{QUERY_STRING} ([a-z0-9]{2000,}) [NC,OR]
+RewriteCond %{QUERY_STRING} (javascript:)(.*)(;) [NC,OR]
+RewriteCond %{QUERY_STRING} (base64_encode)(.*)(\() [NC,OR]
+RewriteCond %{QUERY_STRING} (GLOBALS|REQUEST)(=|\[|%) [NC,OR]
+RewriteCond %{QUERY_STRING} (<|%3C)(.*)script(.*)(>|%3) [NC,OR]
+RewriteCond %{QUERY_STRING} (\\|\.\.\.|\.\./|~|`|<|>|\|) [NC,OR]
+RewriteCond %{QUERY_STRING} (boot\.ini|etc/passwd|self/environ) [NC,OR]
+RewriteCond %{QUERY_STRING} (thumbs?(_editor|open)?|tim(thumb)?)\.php [NC,OR]
+RewriteCond %{QUERY_STRING} (\'|\")(.*)(drop|insert|md5|select|union) [NC]
+RewriteRule .* - [F]
 
-    # Tüm diğer istekleri index.html'e yönlendir (SPA için)
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ frontend/mercan-frontend/dist/index.html [L]
+# API istekleri için backend'e yönlendir
+RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
+RewriteRule ^sanctum/csrf-cookie$ backend/public/index.php [L,QSA]
 
-    # LiteSpeed Cache ayarları
-    CacheEnable public /frontend/mercan-frontend/dist
-    CacheDisable public /api/
-    CacheDisable public /sanctum/
-    
-    # Cache-Control başlıkları
-    <FilesMatch "\.(html|htm)$">
-        Header set Cache-Control "no-cache, no-store, must-revalidate"
-    </FilesMatch>
-    
-    <FilesMatch "\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$">
-        Header set Cache-Control "public, max-age=31536000, immutable"
-    </FilesMatch>
-</IfModule>
+# Statik dosyalar için
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
+RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
 
-# MIME Types
-<IfModule mod_mime.c>
-    AddType application/javascript .js .mjs
-    AddType text/css .css
-    AddType image/svg+xml .svg
-    AddType application/font-woff .woff
-    AddType application/font-woff2 .woff2
-</IfModule>
+# SPA yönlendirmesi - tüm istekleri index.html'e yönlendir
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api
+RewriteCond %{REQUEST_URI} !^/sanctum
+RewriteRule ^(.*)$ frontend/mercan-frontend/dist/index.html [L]
 
 # Güvenlik Başlıkları
 <IfModule mod_headers.c>
@@ -55,7 +49,7 @@
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set X-Content-Type-Options "nosniff"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
     
     # CORS Headers
     Header always set Access-Control-Allow-Origin "https://mercandanismanlik.com"
@@ -67,27 +61,21 @@
     Header always set Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:; font-src 'self' data: https:;"
 </IfModule>
 
+# Önbellekleme
+<FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+</FilesMatch>
+
+<FilesMatch "\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
 # Sıkıştırma
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json
     BrowserMatch ^Mozilla/4 gzip-only-text/html
     BrowserMatch ^Mozilla/4\.0[678] no-gzip
     BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
-</IfModule>
-
-# Kötü niyetli istekleri engelle
-<IfModule mod_rewrite.c>
-    # SQL injection koruması
-    RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
-    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
-    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2})
-    RewriteRule ^(.*)$ index.php [F,L]
-    
-    # Kötü bot koruması
-    RewriteCond %{HTTP_USER_AGENT} ^$ [OR]
-    RewriteCond %{HTTP_USER_AGENT} ^(java|curl|wget).* [NC,OR]
-    RewriteCond %{HTTP_USER_AGENT} ^.*(winhttp|HTTrack|clshttp|archiver|loader|email|harvest|extract|grab|miner).* [NC]
-    RewriteRule .* - [F,L]
 </IfModule>
 
 # PHP ayarları
@@ -100,27 +88,6 @@
     php_flag log_errors on
 </IfModule>
 
-# Önbellekleme
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType text/html "access plus 0 seconds"
-    ExpiresByType text/css "access plus 1 year"
-    ExpiresByType application/javascript "access plus 1 year"
-    ExpiresByType image/jpeg "access plus 1 year"
-    ExpiresByType image/png "access plus 1 year"
-    ExpiresByType image/gif "access plus 1 year"
-    ExpiresByType image/svg+xml "access plus 1 year"
-    ExpiresByType image/x-icon "access plus 1 year"
-</IfModule>
-
-# DirectoryIndex
-DirectoryIndex frontend/mercan-frontend/dist/index.html
-
-# Cloudflare için ek ayarlar
-<IfModule mod_headers.c>
-    # Browser cache bypass için
-    <FilesMatch "\.(js|mjs|css)$">
-        Header set Cache-Control "public, max-age=31536000, immutable"
-        Header set Vary "Accept-Encoding"
-    </FilesMatch>
-</IfModule>
+# Error Documents
+ErrorDocument 404 /frontend/mercan-frontend/dist/index.html
+ErrorDocument 403 /frontend/mercan-frontend/dist/index.html
