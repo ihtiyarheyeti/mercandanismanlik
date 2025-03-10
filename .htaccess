@@ -15,17 +15,15 @@
     RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
     RewriteRule ^sanctum/csrf-cookie$ backend/public/index.php [L,QSA]
 
-    # Eğer dosya veya dizin varsa direkt serve et
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
-    RewriteRule ^ - [L]
-
-    # Frontend dist klasöründeki statik dosyalar için
+    # Assets dosyaları için
+    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$
-    RewriteRule ^(.*)$ frontend/mercan-frontend/dist/$1 [L]
+    RewriteRule ^assets/(.*)$ frontend/mercan-frontend/dist/assets/$1 [L]
 
-    # Tüm diğer istekleri frontend index.html'e yönlendir
-    RewriteRule ^ frontend/mercan-frontend/dist/index.html [L]
+    # Tüm diğer istekleri index.html'e yönlendir
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ frontend/mercan-frontend/dist/index.html [L]
 </IfModule>
 
 # MIME Types
