@@ -1,15 +1,24 @@
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import type { User } from '@/types/user'
+import api from '@/services/api'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true
-})
+export const useAuthStore = defineStore('auth', () => {
+  const user = ref<User | null>(null)
+  const token = ref<string | null>(localStorage.getItem('token'))
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+  const router = useRouter()
 
-const authStore = {
-  async login(email, password) {
+  const login = async (email: string, password: string) => {
+    loading.value = true
+    error.value = null
+
     try {
       // CSRF token al
-      await axios.get(`${import.meta.env.VITE_API_URL}/sanctum/csrf-cookie`)
+      await axios.get('https://api.mercandanismanlik.com/sanctum/csrf-cookie')
       
       // Login isteği
       const response = await api.post('/login', {
@@ -17,11 +26,19 @@ const authStore = {
         password
       })
 
-      // ... existing code ...
-    } catch (error) {
-      // ... existing code ...
+      const { access_token, user: userData } = response.data
+      token.value = access_token
+      user.value = userData
+      localStorage.setItem('token', access_token)
+
+      return true
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Giriş yapılırken bir hata oluştu'
+      return false
+    } finally {
+      loading.value = false
     }
   }
-}
 
-export default authStore 
+  // ... existing code ...
+}) 
