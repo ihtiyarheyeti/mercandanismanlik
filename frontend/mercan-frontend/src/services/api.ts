@@ -1,8 +1,10 @@
 import axios from 'axios'
 
+const baseURL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://mercandanismanlik.com'
+
 // API için instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://mercandanismanlik.com/api',
+  baseURL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -10,6 +12,20 @@ const api = axios.create({
     'X-Requested-With': 'XMLHttpRequest'
   }
 })
+
+// Request interceptor
+api.interceptors.request.use(
+  config => {
+    // API endpoint'leri için /api prefix'i ekle
+    if (!config.url?.startsWith('/sanctum')) {
+      config.url = '/api' + config.url
+    }
+    return config
+  },
+  error => {
+    return Promise.reject(error)
+  }
+)
 
 // Response interceptor
 api.interceptors.response.use(
