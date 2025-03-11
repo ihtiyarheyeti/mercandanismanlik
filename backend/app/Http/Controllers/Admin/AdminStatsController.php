@@ -17,15 +17,34 @@ class AdminStatsController extends Controller
 
     public function __construct()
     {
-        $this->propertyId = env('ANALYTICS_PROPERTY_ID');
-        $this->client = new BetaAnalyticsDataClient([
-            'credentials' => storage_path('app/analytics/service-account-credentials.json')
-        ]);
+        try {
+            $this->propertyId = env('ANALYTICS_PROPERTY_ID');
+            \Log::info('Analytics Property ID: ' . $this->propertyId);
+            
+            $credentialsPath = storage_path('app/analytics/service-account-credentials.json');
+            if (!file_exists($credentialsPath)) {
+                \Log::error('Analytics credentials file not found at: ' . $credentialsPath);
+                throw new \Exception('Analytics credentials file not found');
+            }
+            
+            \Log::info('Loading Analytics client with credentials from: ' . $credentialsPath);
+            $this->client = new BetaAnalyticsDataClient([
+                'credentials' => $credentialsPath
+            ]);
+            \Log::info('Analytics client loaded successfully');
+        } catch (\Exception $e) {
+            \Log::error('Error initializing Analytics client: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            throw $e;
+        }
     }
 
     public function overview()
     {
         try {
+            \Log::info('Fetching analytics overview data');
+            \Log::info('Using property ID: properties/' . $this->propertyId);
+            
             // Son 30 günün verilerini al
             $response = $this->client->runReport([
                 'property' => 'properties/' . $this->propertyId,
@@ -39,6 +58,10 @@ class AdminStatsController extends Controller
                     new Metric(['name' => 'activeUsers']),
                     new Metric(['name' => 'screenPageViews']),
                 ],
+            ]);
+
+            \Log::info('Successfully received analytics data', [
+                'response' => json_encode($response->serializeToJsonString())
             ]);
 
             // Önceki 30 günün verilerini al
@@ -72,7 +95,11 @@ class AdminStatsController extends Controller
             ]);
         } catch (\Exception $e) {
             \Log::error('Analytics overview error: ' . $e->getMessage());
-            return response()->json(['error' => 'İstatistikler yüklenirken bir hata oluştu'], 500);
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'error' => 'İstatistikler yüklenirken bir hata oluştu',
+                'details' => $e->getMessage()
+            ], 500);
         }
     }
 
