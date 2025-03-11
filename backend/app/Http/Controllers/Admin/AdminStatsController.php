@@ -18,23 +18,40 @@ class AdminStatsController extends Controller
     public function __construct()
     {
         try {
+            \Log::info('AdminStatsController başlatılıyor');
+            
             $this->propertyId = env('ANALYTICS_PROPERTY_ID');
-            \Log::info('Analytics Property ID: ' . $this->propertyId);
+            \Log::info('Analytics Property ID:', ['id' => $this->propertyId]);
             
             $credentialsPath = storage_path('app/analytics/service-account-credentials.json');
-            if (!file_exists($credentialsPath)) {
-                \Log::error('Analytics credentials file not found at: ' . $credentialsPath);
-                throw new \Exception('Analytics credentials file not found');
-            }
+            \Log::info('Kimlik dosyası yolu:', ['path' => $credentialsPath]);
             
-            \Log::info('Loading Analytics client with credentials from: ' . $credentialsPath);
+            if (!file_exists($credentialsPath)) {
+                \Log::error('Kimlik dosyası bulunamadı:', ['path' => $credentialsPath]);
+                throw new \Exception('Google Analytics kimlik dosyası bulunamadı: ' . $credentialsPath);
+            }
+
+            \Log::info('Kimlik dosyası içeriği kontrol ediliyor');
+            $credentials = json_decode(file_get_contents($credentialsPath), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                \Log::error('Kimlik dosyası JSON hatası:', ['error' => json_last_error_msg()]);
+                throw new \Exception('Kimlik dosyası geçersiz JSON formatı');
+            }
+            \Log::info('Kimlik dosyası geçerli');
+
+            \Log::info('Analytics istemcisi oluşturuluyor');
             $this->client = new BetaAnalyticsDataClient([
                 'credentials' => $credentialsPath
             ]);
-            \Log::info('Analytics client loaded successfully');
+            \Log::info('Analytics istemcisi başarıyla oluşturuldu');
+            
         } catch (\Exception $e) {
-            \Log::error('Error initializing Analytics client: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
+            \Log::error('AdminStatsController başlatma hatası:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
             throw $e;
         }
     }
@@ -42,10 +59,11 @@ class AdminStatsController extends Controller
     public function overview()
     {
         try {
-            \Log::info('Fetching analytics overview data');
-            \Log::info('Using property ID: properties/' . $this->propertyId);
-            
+            \Log::info('İstatistik verileri alınıyor');
+            \Log::info('Kullanılan Property ID:', ['id' => 'properties/' . $this->propertyId]);
+
             // Son 30 günün verilerini al
+            \Log::info('Son 30 günün verileri isteniyor');
             $response = $this->client->runReport([
                 'property' => 'properties/' . $this->propertyId,
                 'dateRanges' => [
@@ -59,10 +77,7 @@ class AdminStatsController extends Controller
                     new Metric(['name' => 'screenPageViews']),
                 ],
             ]);
-
-            \Log::info('Successfully received analytics data', [
-                'response' => json_encode($response->serializeToJsonString())
-            ]);
+            \Log::info('Son 30 günün verileri alındı', ['response' => json_encode($response->serializeToJsonString())]);
 
             // Önceki 30 günün verilerini al
             $previousResponse = $this->client->runReport([
