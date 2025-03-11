@@ -4,34 +4,68 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Analytics;
-use Spatie\Analytics\Period;
+use Google\Analytics\Data\V1beta\BetaAnalyticsDataClient;
+use Google\Analytics\Data\V1beta\DateRange;
+use Google\Analytics\Data\V1beta\Dimension;
+use Google\Analytics\Data\V1beta\Metric;
 use Carbon\Carbon;
 
 class AdminStatsController extends Controller
 {
+    private $propertyId;
+    private $client;
+
+    public function __construct()
+    {
+        $this->propertyId = env('ANALYTICS_PROPERTY_ID');
+        $this->client = new BetaAnalyticsDataClient([
+            'credentials' => storage_path('app/analytics/service-account-credentials.json')
+        ]);
+    }
+
     public function overview()
     {
         try {
-            $period = Period::days(30);
-            $analyticsData = Analytics::fetchTotalVisitorsAndPageViews($period);
-            
-            $totalVisitors = $analyticsData->sum('visitors');
-            $totalPageViews = $analyticsData->sum('pageViews');
-            
-            // Önceki ay ile karşılaştırma
-            $previousPeriod = Period::create(Carbon::now()->subDays(60), Carbon::now()->subDays(30));
-            $previousData = Analytics::fetchTotalVisitorsAndPageViews($previousPeriod);
-            $previousVisitors = $previousData->sum('visitors');
-            
-            // Yüzde değişimi hesapla
+            // Son 30 günün verilerini al
+            $response = $this->client->runReport([
+                'property' => 'properties/' . $this->propertyId,
+                'dateRanges' => [
+                    new DateRange([
+                        'start_date' => '30daysAgo',
+                        'end_date' => 'today',
+                    ]),
+                ],
+                'metrics' => [
+                    new Metric(['name' => 'activeUsers']),
+                    new Metric(['name' => 'screenPageViews']),
+                ],
+            ]);
+
+            // Önceki 30 günün verilerini al
+            $previousResponse = $this->client->runReport([
+                'property' => 'properties/' . $this->propertyId,
+                'dateRanges' => [
+                    new DateRange([
+                        'start_date' => '60daysAgo',
+                        'end_date' => '31daysAgo',
+                    ]),
+                ],
+                'metrics' => [
+                    new Metric(['name' => 'activeUsers']),
+                ],
+            ]);
+
+            $currentVisitors = $response->getRows()[0]->getMetricValues()[0]->getValue();
+            $previousVisitors = $previousResponse->getRows()[0]->getMetricValues()[0]->getValue();
+            $totalPageViews = $response->getRows()[0]->getMetricValues()[1]->getValue();
+
             $visitorChange = $previousVisitors > 0 
-                ? (($totalVisitors - $previousVisitors) / $previousVisitors) * 100 
+                ? (($currentVisitors - $previousVisitors) / $previousVisitors) * 100 
                 : 0;
 
             return response()->json([
-                'total_visitors' => $totalVisitors,
-                'total_pageviews' => $totalPageViews,
+                'total_visitors' => (int)$currentVisitors,
+                'total_pageviews' => (int)$totalPageViews,
                 'trends' => [
                     'visitors' => round($visitorChange, 2)
                 ]
@@ -45,12 +79,37 @@ class AdminStatsController extends Controller
     public function visitors()
     {
         try {
-            $period = Period::days(7);
-            $analyticsData = Analytics::fetchTotalVisitorsAndPageViews($period);
-            
+            $response = $this->client->runReport([
+                'property' => 'properties/' . $this->propertyId,
+                'dateRanges' => [
+                    new DateRange([
+                        'start_date' => '7daysAgo',
+                        'end_date' => 'today',
+                    ]),
+                ],
+                'dimensions' => [
+                    new Dimension(['name' => 'date']),
+                ],
+                'metrics' => [
+                    new Metric(['name' => 'activeUsers']),
+                ],
+                'orderBys' => [
+                    ['dimension' => ['orderType' => 'ALPHANUMERIC', 'dimensionName' => 'date']],
+                ],
+            ]);
+
+            $labels = [];
+            $data = [];
+
+            foreach ($response->getRows() as $row) {
+                $date = Carbon::createFromFormat('Ymd', $row->getDimensionValues()[0]->getValue());
+                $labels[] = $date->format('d.m.Y');
+                $data[] = (int)$row->getMetricValues()[0]->getValue();
+            }
+
             return response()->json([
-                'labels' => $analyticsData->pluck('date')->map(fn($date) => $date->format('d.m.Y')),
-                'data' => $analyticsData->pluck('visitors')
+                'labels' => $labels,
+                'data' => $data
             ]);
         } catch (\Exception $e) {
             \Log::error('Analytics visitors error: ' . $e->getMessage());
@@ -61,12 +120,37 @@ class AdminStatsController extends Controller
     public function pageViews()
     {
         try {
-            $period = Period::days(7);
-            $analyticsData = Analytics::fetchTotalVisitorsAndPageViews($period);
-            
+            $response = $this->client->runReport([
+                'property' => 'properties/' . $this->propertyId,
+                'dateRanges' => [
+                    new DateRange([
+                        'start_date' => '7daysAgo',
+                        'end_date' => 'today',
+                    ]),
+                ],
+                'dimensions' => [
+                    new Dimension(['name' => 'date']),
+                ],
+                'metrics' => [
+                    new Metric(['name' => 'screenPageViews']),
+                ],
+                'orderBys' => [
+                    ['dimension' => ['orderType' => 'ALPHANUMERIC', 'dimensionName' => 'date']],
+                ],
+            ]);
+
+            $labels = [];
+            $data = [];
+
+            foreach ($response->getRows() as $row) {
+                $date = Carbon::createFromFormat('Ymd', $row->getDimensionValues()[0]->getValue());
+                $labels[] = $date->format('d.m.Y');
+                $data[] = (int)$row->getMetricValues()[0]->getValue();
+            }
+
             return response()->json([
-                'labels' => $analyticsData->pluck('date')->map(fn($date) => $date->format('d.m.Y')),
-                'data' => $analyticsData->pluck('pageViews')
+                'labels' => $labels,
+                'data' => $data
             ]);
         } catch (\Exception $e) {
             \Log::error('Analytics pageviews error: ' . $e->getMessage());
@@ -77,12 +161,33 @@ class AdminStatsController extends Controller
     public function browsers()
     {
         try {
-            $period = Period::days(30);
-            $analyticsData = Analytics::fetchTopBrowsers($period);
-            
+            $response = $this->client->runReport([
+                'property' => 'properties/' . $this->propertyId,
+                'dateRanges' => [
+                    new DateRange([
+                        'start_date' => '30daysAgo',
+                        'end_date' => 'today',
+                    ]),
+                ],
+                'dimensions' => [
+                    new Dimension(['name' => 'browser']),
+                ],
+                'metrics' => [
+                    new Metric(['name' => 'activeUsers']),
+                ],
+            ]);
+
+            $labels = [];
+            $data = [];
+
+            foreach ($response->getRows() as $row) {
+                $labels[] = $row->getDimensionValues()[0]->getValue();
+                $data[] = (int)$row->getMetricValues()[0]->getValue();
+            }
+
             return response()->json([
-                'labels' => $analyticsData->pluck('browser'),
-                'data' => $analyticsData->pluck('sessions')
+                'labels' => $labels,
+                'data' => $data
             ]);
         } catch (\Exception $e) {
             \Log::error('Analytics browsers error: ' . $e->getMessage());
@@ -93,12 +198,33 @@ class AdminStatsController extends Controller
     public function devices()
     {
         try {
-            $period = Period::days(30);
-            $analyticsData = Analytics::fetchTopDevices($period);
-            
+            $response = $this->client->runReport([
+                'property' => 'properties/' . $this->propertyId,
+                'dateRanges' => [
+                    new DateRange([
+                        'start_date' => '30daysAgo',
+                        'end_date' => 'today',
+                    ]),
+                ],
+                'dimensions' => [
+                    new Dimension(['name' => 'deviceCategory']),
+                ],
+                'metrics' => [
+                    new Metric(['name' => 'activeUsers']),
+                ],
+            ]);
+
+            $labels = [];
+            $data = [];
+
+            foreach ($response->getRows() as $row) {
+                $labels[] = $row->getDimensionValues()[0]->getValue();
+                $data[] = (int)$row->getMetricValues()[0]->getValue();
+            }
+
             return response()->json([
-                'labels' => $analyticsData->pluck('deviceCategory'),
-                'data' => $analyticsData->pluck('sessions')
+                'labels' => $labels,
+                'data' => $data
             ]);
         } catch (\Exception $e) {
             \Log::error('Analytics devices error: ' . $e->getMessage());
@@ -109,16 +235,36 @@ class AdminStatsController extends Controller
     public function locations()
     {
         try {
-            $period = Period::days(30);
-            $analyticsData = Analytics::fetchTopCountries($period);
-            
-            $countries = $analyticsData->map(function($item) {
-                return [
-                    'name' => $item['country'],
-                    'percentage' => round(($item['sessions'] / $analyticsData->sum('sessions')) * 100, 2),
+            $response = $this->client->runReport([
+                'property' => 'properties/' . $this->propertyId,
+                'dateRanges' => [
+                    new DateRange([
+                        'start_date' => '30daysAgo',
+                        'end_date' => 'today',
+                    ]),
+                ],
+                'dimensions' => [
+                    new Dimension(['name' => 'country']),
+                ],
+                'metrics' => [
+                    new Metric(['name' => 'activeUsers']),
+                ],
+            ]);
+
+            $totalUsers = 0;
+            foreach ($response->getRows() as $row) {
+                $totalUsers += (int)$row->getMetricValues()[0]->getValue();
+            }
+
+            $countries = [];
+            foreach ($response->getRows() as $row) {
+                $users = (int)$row->getMetricValues()[0]->getValue();
+                $countries[] = [
+                    'name' => $row->getDimensionValues()[0]->getValue(),
+                    'percentage' => round(($users / $totalUsers) * 100, 2),
                     'color' => 'blue'
                 ];
-            });
+            }
 
             return response()->json([
                 'countries' => $countries
