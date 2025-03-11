@@ -55,8 +55,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/services/api'
-import axios from 'axios'
+import api, { sanctumApi } from '@/services/api'
 
 const router = useRouter()
 const email = ref('')
@@ -69,10 +68,8 @@ const handleLogin = async () => {
   error.value = ''
 
   try {
-    // CSRF token isteği için farklı bir axios instance kullan
-    await axios.get('https://mercandanismanlik.com/sanctum/csrf-cookie', {
-      withCredentials: true
-    })
+    // CSRF token isteği için sanctumApi kullan
+    await sanctumApi.get('/sanctum/csrf-cookie')
     
     // Login isteği
     const response = await api.post('/login', {
