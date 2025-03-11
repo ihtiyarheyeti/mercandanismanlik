@@ -3,7 +3,6 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-import axios from 'axios'
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 
@@ -29,12 +28,6 @@ const toastOptions = {
   icon: true,
   rtl: false
 }
-
-// Axios yapılandırması
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'https://mercandanismanlik.com'
-axios.defaults.withCredentials = true
-axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
-axios.defaults.headers.common['Accept'] = 'application/json'
 
 const app = createApp(App)
 const pinia = createPinia()
