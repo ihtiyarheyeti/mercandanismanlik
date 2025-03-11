@@ -68,8 +68,8 @@ const handleLogin = async () => {
   error.value = ''
 
   try {
-    // CSRF token isteği için sanctumApi kullan
-    await sanctumApi.get('/sanctum/csrf-cookie')
+    // CSRF token isteği
+    await api.get('/sanctum/csrf-cookie')
     
     // Login isteği
     const response = await api.post('/login', {
