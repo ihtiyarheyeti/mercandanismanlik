@@ -30,7 +30,7 @@ export interface LocationData {
 // API fonksiyonları
 export const adminStatsService = {
   // Özet istatistikler
-  getOverview: () => api.get<OverviewStats>('/admin/stats/overview'),
+  getOverview: () => api.get<OverviewStats>('/api/admin/stats/overview'),
 
   // Ziyaretçi istatistikleri
   getVisitors: () => api.get<ChartData>('/admin/stats/visitors'),
@@ -39,11 +39,11 @@ export const adminStatsService = {
   getPageViews: () => api.get<ChartData>('/admin/stats/pageviews'),
 
   // Tarayıcı dağılımı
-  getBrowsers: () => api.get<ChartData>('/admin/stats/browsers'),
+  getBrowsers: () => api.get<ChartData>('/api/admin/stats/browsers'),
 
   // Cihaz dağılımı
   getDevices: () => api.get<ChartData>('/admin/stats/devices'),
 
   // Ziyaretçi konumları
-  getLocations: () => api.get<LocationData>('/admin/stats/locations')
+  getLocations: () => api.get<LocationData>('/api/admin/stats/locations')
 } 
