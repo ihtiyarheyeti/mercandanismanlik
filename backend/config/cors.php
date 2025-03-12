@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://mercandanismanlik.com'],
+    'allowed_origins' => ['https://mercandanismanlik.com', 'https://api.mercandanismanlik.com'],
 
     'allowed_origins_patterns' => [],
 
