@@ -24,9 +24,6 @@ Route::get('/', function () {
     ]);
 });
 
-// CSRF cookie rotası
-Route::get('/sanctum/csrf-cookie', '\Laravel\Sanctum\Http\Controllers\CsrfCookieController@show');
-
 // Auth rotaları
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
