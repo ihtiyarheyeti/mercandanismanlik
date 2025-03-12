@@ -25,9 +25,7 @@ Route::get('/', function () {
 });
 
 // CSRF cookie rotası
-Route::get('/sanctum/csrf-cookie', function () {
-    return response()->json(['message' => 'CSRF cookie set']);
-})->middleware(['web']);
+Route::get('/sanctum/csrf-cookie', '\Laravel\Sanctum\Http\Controllers\CsrfCookieController@show');
 
 // Auth rotaları
 Route::middleware(['auth:sanctum'])->group(function () {
