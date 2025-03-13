@@ -7,6 +7,11 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\AdminStatsController;
 use App\Http\Controllers\Admin\SeoSettingController;
 use App\Http\Controllers\Content\ContentController;
+use App\Http\Controllers\Admin\GeneralSettingsController;
+use App\Http\Controllers\Admin\ReferenceController;
+use App\Http\Controllers\Admin\FaqController;
+use App\Http\Controllers\Admin\ReadySiteController;
+use App\Http\Controllers\Admin\BlogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,11 +36,9 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::middleware('auth:sanctum')->group(function () {
     // Admin rotaları
     Route::prefix('admin')->group(function () {
-        // Settings
-        Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'index']);
-        Route::post('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'update']);
-        Route::post('/settings/logo', [App\Http\Controllers\Admin\SettingsController::class, 'updateLogo']);
-        Route::post('/settings/favicon', [App\Http\Controllers\Admin\SettingsController::class, 'updateFavicon']);
+        // Genel ayarlar
+        Route::get('general-settings', [GeneralSettingsController::class, 'index']);
+        Route::post('general-settings', [GeneralSettingsController::class, 'update']);
 
         // İstatistikler
         Route::prefix('stats')->group(function () {
@@ -47,11 +50,37 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('locations', [AdminStatsController::class, 'locations']);
         });
 
-        // SEO Ayarları
-        Route::get('/seo-settings', [SeoSettingController::class, 'index']);
-        Route::post('/seo-settings', [SeoSettingController::class, 'update']);
-        Route::post('/seo-settings/generate-sitemap', [SeoSettingController::class, 'generateSitemap']);
-        Route::post('/seo-settings/submit-to-search-engines', [SeoSettingController::class, 'submitToSearchEngines']);
+        // SEO ayarları
+        Route::get('seo-settings', [SeoSettingController::class, 'index']);
+        Route::post('seo-settings', [SeoSettingController::class, 'update']);
+        Route::post('seo-settings/generate-sitemap', [SeoSettingController::class, 'generateSitemap']);
+        Route::post('seo-settings/submit-to-search-engines', [SeoSettingController::class, 'submitToSearchEngines']);
+
+        // Referanslar
+        Route::get('references', [ReferenceController::class, 'index']);
+        Route::post('references', [ReferenceController::class, 'store']);
+        Route::put('references/{id}', [ReferenceController::class, 'update']);
+        Route::delete('references/{id}', [ReferenceController::class, 'destroy']);
+
+        // SSS
+        Route::get('faqs', [FaqController::class, 'index']);
+        Route::post('faqs', [FaqController::class, 'store']);
+        Route::put('faqs/{id}', [FaqController::class, 'update']);
+        Route::delete('faqs/{id}', [FaqController::class, 'destroy']);
+        Route::post('faqs/reorder', [FaqController::class, 'reorder']);
+
+        // Hazır Siteler
+        Route::get('ready-sites', [ReadySiteController::class, 'index']);
+        Route::post('ready-sites', [ReadySiteController::class, 'store']);
+        Route::put('ready-sites/{id}', [ReadySiteController::class, 'update']);
+        Route::delete('ready-sites/{id}', [ReadySiteController::class, 'destroy']);
+        Route::post('ready-sites/reorder', [ReadySiteController::class, 'reorder']);
+
+        // Blog
+        Route::get('blogs', [BlogController::class, 'index']);
+        Route::post('blogs', [BlogController::class, 'store']);
+        Route::put('blogs/{id}', [BlogController::class, 'update']);
+        Route::delete('blogs/{id}', [BlogController::class, 'destroy']);
     });
 
     // Content routes
