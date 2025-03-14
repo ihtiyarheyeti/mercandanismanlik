@@ -15,11 +15,11 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['*', 'sanctum/csrf-cookie', 'api/*'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('FRONTEND_URL', 'https://mercan.ltd')],
+    'allowed_origins' => ['https://mercandanismanlik.com'],
 
     'allowed_origins_patterns' => [],
 
