@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // API için instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://api.mercan.ltd',
+  baseURL: import.meta.env.PROD ? 'https://mercandanismanlik.com' : '',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

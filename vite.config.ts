@@ -13,6 +13,16 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
-    host: true
+    host: true,
+    proxy: {
+      '/api': {
+        target: 'https://mercandanismanlik.com',
+        changeOrigin: true
+      },
+      '/sanctum': {
+        target: 'https://mercandanismanlik.com',
+        changeOrigin: true
+      }
+    }
   }
 }) 
