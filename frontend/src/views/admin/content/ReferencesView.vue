@@ -11,36 +11,47 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="referans in referanslar" :key="referans.id" 
-          class="bg-white dark:bg-gray-700 rounded-lg shadow-lg overflow-hidden">
-          <div class="aspect-w-16 aspect-h-9 relative">
-            <img 
-              :src="referans.logo" 
-              :alt="referans.firmaAdi"
-              class="w-full h-full object-cover"
-              @error="(e: Event) => { if (e.target instanceof HTMLImageElement) e.target.src = '/images/default-logo.png' }"
-            />
-          </div>
-          <div class="p-4">
-            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              {{ referans.firmaAdi }}
-            </h4>
-            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              {{ referans.aciklama }}
-            </p>
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-500 dark:text-gray-400">
-                {{ referans.sektor }}
-              </span>
-              <div class="flex space-x-2">
-                <button @click="referansDuzenle(referans)" class="text-blue-500 hover:text-blue-600">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button @click="referansSil(referans.id)" class="text-red-500 hover:text-red-600">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
+      <div v-if="loading" class="flex justify-center items-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+
+      <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        {{ error }}
+      </div>
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="reference in references" :key="reference.id" class="bg-white rounded-lg shadow overflow-hidden">
+          <img 
+            :src="reference.logo" 
+            :alt="reference.company_name"
+            class="w-full h-48 object-contain p-4"
+          />
+          <div class="p-4 border-t">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">{{ reference.company_name }}</h2>
+            <p class="text-gray-600 text-sm mb-4">{{ reference.description }}</p>
+            <div class="flex items-center justify-between text-sm text-gray-500">
+              <a 
+                :href="reference.website" 
+                target="_blank"
+                class="text-blue-600 hover:text-blue-900"
+              >
+                Website
+              </a>
+              <span>{{ reference.year }}</span>
+            </div>
+            <div class="mt-4 flex justify-end space-x-2">
+              <button 
+                class="text-blue-600 hover:text-blue-900"
+                @click="router.push(`/admin/content/references/${reference.id}/edit`)"
+              >
+                Düzenle
+              </button>
+              <button 
+                class="text-red-600 hover:text-red-900"
+                @click="deleteReference(reference.id)"
+              >
+                Sil
+              </button>
             </div>
           </div>
         </div>
@@ -149,42 +160,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
 
-interface Referans {
-  id: number
-  firmaAdi: string
-  logo: string
-  sektor: string
-  website: string
-  aciklama: string
-  yapilanIsler: string
+const router = useRouter()
+const references = ref([])
+const loading = ref(false)
+const error = ref('')
+
+const fetchReferences = async () => {
+  try {
+    loading.value = true
+    const response = await axios.get('/api/admin/references')
+    references.value = response.data.data
+  } catch (err: any) {
+    error.value = err.response?.data?.message || 'Referanslar alınamadı'
+  } finally {
+    loading.value = false
+  }
 }
 
-const referanslar = ref<Referans[]>([
-  {
-    id: 1,
-    firmaAdi: 'ABC Teknoloji',
-    logo: '/images/referanslar/abc-tech.png',
-    sektor: 'Teknoloji',
-    website: 'https://www.abctech.com',
-    aciklama: 'E-ticaret platformu geliştirme ve dijital pazarlama hizmetleri',
-    yapilanIsler: 'Web Sitesi Tasarımı\nSEO Optimizasyonu\nSosyal Medya Yönetimi'
-  },
-  {
-    id: 2,
-    firmaAdi: 'XYZ Holding',
-    logo: '/images/referanslar/xyz-holding.png',
-    sektor: 'Finans',
-    website: 'https://www.xyzholding.com',
-    aciklama: 'Kurumsal web sitesi ve dijital dönüşüm danışmanlığı',
-    yapilanIsler: 'Kurumsal Web Sitesi\nİçerik Yönetimi\nAnalitik Raporlama'
+const deleteReference = async (id: number) => {
+  if (confirm('Bu referansı silmek istediğinizden emin misiniz?')) {
+    try {
+      await axios.delete(`/api/admin/references/${id}`)
+      references.value = references.value.filter(ref => ref.id !== id)
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Referans silinemedi'
+    }
   }
-])
+}
+
+onMounted(() => {
+  fetchReferences()
+})
 
 const modalAcik = ref(false)
 const duzenlemeModu = ref(false)
-const aktifReferans = ref<Referans>({
+const aktifReferans = ref({
   id: 0,
   firmaAdi: '',
   logo: '',
@@ -197,7 +211,7 @@ const aktifReferans = ref<Referans>({
 const yeniReferansEkle = () => {
   duzenlemeModu.value = false
   aktifReferans.value = {
-    id: Math.max(0, ...referanslar.value.map(r => r.id)) + 1,
+    id: Math.max(0, ...references.value.map(r => r.id)) + 1,
     firmaAdi: '',
     logo: '',
     sektor: '',
@@ -208,34 +222,17 @@ const yeniReferansEkle = () => {
   modalAcik.value = true
 }
 
-const referansDuzenle = (referans: Referans) => {
-  duzenlemeModu.value = true
-  aktifReferans.value = { ...referans }
-  modalAcik.value = true
-}
-
-const referansSil = async (id: number) => {
-  if (confirm('Bu referansı silmek istediğinizden emin misiniz?')) {
-    try {
-      // API çağrısı yapılacak
-      referanslar.value = referanslar.value.filter(r => r.id !== id)
-    } catch (error) {
-      console.error('Referans silinirken hata:', error)
-    }
-  }
-}
-
 const referansKaydet = async () => {
   try {
     if (duzenlemeModu.value) {
       // Güncelleme API çağrısı yapılacak
-      const index = referanslar.value.findIndex(r => r.id === aktifReferans.value.id)
+      const index = references.value.findIndex(r => r.id === aktifReferans.value.id)
       if (index !== -1) {
-        referanslar.value[index] = { ...aktifReferans.value }
+        references.value[index] = { ...aktifReferans.value }
       }
     } else {
       // Yeni referans ekleme API çağrısı yapılacak
-      referanslar.value.push({ ...aktifReferans.value })
+      references.value.push({ ...aktifReferans.value })
     }
     modalKapat()
   } catch (error) {
