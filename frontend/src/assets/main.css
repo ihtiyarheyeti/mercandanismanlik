@@ -1,3 +1,9 @@
+@import './base.css';
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Global styles */
 :root {
   --primary-color: #1a73e8;
@@ -19,4 +25,12 @@ body {
 
 #app {
   min-height: 100vh;
+  max-width: 1920px;
+  margin: 0 auto;
+  font-weight: normal;
+}
+
+a {
+  text-decoration: none;
+  transition: 0.4s;
 } 
