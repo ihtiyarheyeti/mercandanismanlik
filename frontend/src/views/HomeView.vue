@@ -48,15 +48,21 @@ const particlesOptions = {
 </script>
 
 <template>
-  <div class="min-h-screen bg-blue-600 text-white flex items-center">
-    <div class="container mx-auto px-4">
-      <h1 class="text-4xl font-bold">Mercan Danışmanlık</h1>
-      <p class="mt-4 text-xl">Dijital çözümler için yanınızdayız.</p>
-    </div>
-  </div>
+  <main>
+    <h1>Mercan Danışmanlık</h1>
+  </main>
 </template>
 
 <style scoped>
+main {
+  padding: 2rem;
+}
+
+h1 {
+  font-size: 2rem;
+  color: var(--primary-color);
+}
+
 .card {
   @apply bg-white rounded-xl shadow p-8;
 }
