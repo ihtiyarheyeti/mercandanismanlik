@@ -19,8 +19,10 @@ import { RouterLink, RouterView } from 'vue-router'
               v-for="(link, index) in [
                 { to: '/', text: 'Ana Sayfa' },
                 { to: '/hizmetler', text: 'Hizmetler' },
-                { to: '/analiz', text: 'Site Analizi' },
+                { to: '/hazir-site', text: 'Hazır Site' },
+                { to: '/araclar', text: 'Araçlar' },
                 { to: '/blog', text: 'Blog' },
+                { to: '/hakkimizda', text: 'Hakkımızda' },
                 { to: '/iletisim', text: 'İletişim' }
               ]"
               :key="index"
