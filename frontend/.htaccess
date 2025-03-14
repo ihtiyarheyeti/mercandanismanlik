@@ -22,6 +22,7 @@ SetEnvIf Request_URI "\.css$" IS_CSS
 SetEnvIf Request_URI "\.ttf$" IS_TTF
 SetEnvIf Request_URI "\.woff2$" IS_WOFF2
 
+# SPA Routing
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
@@ -29,4 +30,9 @@ SetEnvIf Request_URI "\.woff2$" IS_WOFF2
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule . /index.html [L]
+</IfModule>
+
+# CORS
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
 </IfModule> 
