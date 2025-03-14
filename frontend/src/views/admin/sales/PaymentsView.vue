@@ -199,7 +199,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 
 interface Odeme {
   id: number
@@ -220,27 +221,25 @@ interface Filtreler {
   arama: string
 }
 
-const odemeler = ref<Odeme[]>([
-  {
-    id: 1,
-    islemNo: 'ODM001',
-    musteriAdi: 'Ahmet Yılmaz',
-    tutar: 4999.99,
-    yontem: 'kredi_karti',
-    durum: 'onaylandi',
-    tarih: '2024-02-28T10:00:00',
-    notlar: 'Ödeme başarıyla tamamlandı'
-  },
-  {
-    id: 2,
-    islemNo: 'ODM002',
-    musteriAdi: 'Ayşe Demir',
-    tutar: 2499.99,
-    yontem: 'havale',
-    durum: 'beklemede',
-    tarih: '2024-02-28T11:30:00'
+const payments = ref([])
+const loading = ref(false)
+const error = ref('')
+
+const fetchPayments = async () => {
+  try {
+    loading.value = true
+    const response = await axios.get('/api/admin/sales/payments')
+    payments.value = response.data.data
+  } catch (err: any) {
+    error.value = err.response?.data?.message || 'Ödemeler alınamadı'
+  } finally {
+    loading.value = false
   }
-])
+}
+
+onMounted(() => {
+  fetchPayments()
+})
 
 const filtreler = ref<Filtreler>({
   durum: '',
@@ -263,7 +262,7 @@ const aktifOdeme = ref<Odeme>({
 })
 
 const filtrelenmisOdemeler = computed(() => {
-  return odemeler.value.filter(odeme => {
+  return payments.value.filter(odeme => {
     const durumUygun = !filtreler.value.durum || odeme.durum === filtreler.value.durum
     const yontemUygun = !filtreler.value.yontem || odeme.yontem === filtreler.value.yontem
     
@@ -327,9 +326,9 @@ const odemeDetay = (id: number) => {
 const odemeKaydet = async () => {
   try {
     // API çağrısı yapılacak
-    const index = odemeler.value.findIndex(o => o.id === aktifOdeme.value.id)
+    const index = payments.value.findIndex(o => o.id === aktifOdeme.value.id)
     if (index !== -1) {
-      odemeler.value[index] = { ...aktifOdeme.value }
+      payments.value[index] = { ...aktifOdeme.value }
     }
     modalKapat()
   } catch (error) {
