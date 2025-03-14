@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     try {
       // CSRF token al
-      await axios.get('https://mercandanismanlik.com/sanctum/csrf-cookie')
+      await axios.get('https://api.mercandanismanlik.com/sanctum/csrf-cookie')
       
       // Login isteği
       const response = await api.post('/login', {
