@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // API için instance
 const api = axios.create({
-  baseURL: 'https://api.mercandanismanlik.com',
+  baseURL: import.meta.env.PROD ? 'https://mercandanismanlik.com' : 'http://localhost:8000',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

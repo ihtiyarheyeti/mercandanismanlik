@@ -18,11 +18,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// CSRF cookie rotası
-Route::get('/sanctum/csrf-cookie', function () {
-    return response()->json(['message' => 'CSRF cookie set']);
-})->middleware(['web']);
-
 // Auth rotaları
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
