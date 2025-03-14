@@ -1,237 +1,117 @@
 <template>
-  <div>
-    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">Reklam Bütçesi Yönetimi</h2>
-
-    <!-- Bütçe Özeti -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-          Toplam Bütçe
-        </h3>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white">
-          {{ formatFiyat(butceOzeti.toplamButce) }} ₺
-        </p>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-          Yıllık bütçe
-        </p>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-          Harcanan
-        </h3>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white">
-          {{ formatFiyat(butceOzeti.harcanan) }} ₺
-        </p>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-          Bu ay: {{ formatFiyat(butceOzeti.buAyHarcanan) }} ₺
-        </p>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-          Kalan
-        </h3>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white">
-          {{ formatFiyat(butceOzeti.kalan) }} ₺
-        </p>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-          Günlük limit: {{ formatFiyat(butceOzeti.gunlukLimit) }} ₺
-        </p>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-          ROI
-        </h3>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white">
-          {{ butceOzeti.roi }}%
-        </p>
-        <p :class="[
-          'text-sm mt-2',
-          butceOzeti.roiDegisim > 0 ? 'text-green-600' : 'text-red-600'
-        ]">
-          {{ butceOzeti.roiDegisim > 0 ? '+' : '' }}{{ butceOzeti.roiDegisim }}%
-        </p>
-      </div>
+  <div class="p-4">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Reklam Bütçesi</h1>
+      <button 
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        @click="router.push('/admin/ads/budget/create')"
+      >
+        Yeni Bütçe Ekle
+      </button>
     </div>
 
-    <!-- Platform Bazlı Bütçe -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Platform Bazlı Bütçe</h3>
-      
-      <div class="space-y-6">
-        <div v-for="platform in platformButceleri" :key="platform.id" class="space-y-2">
-          <div class="flex justify-between items-center">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ platform.ad }}</span>
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-              {{ formatFiyat(platform.harcanan) }} / {{ formatFiyat(platform.butce) }} ₺
-            </span>
-          </div>
-          <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
-            <div
-              class="h-full rounded-full"
-              :class="{
-                'bg-green-500': (platform.harcanan / platform.butce) < 0.8,
-                'bg-yellow-500': (platform.harcanan / platform.butce) >= 0.8 && (platform.harcanan / platform.butce) < 0.95,
-                'bg-red-500': (platform.harcanan / platform.butce) >= 0.95
-              }"
-              :style="{ width: `${Math.min((platform.harcanan / platform.butce) * 100, 100)}%` }"
-            ></div>
-          </div>
-        </div>
-      </div>
+    <div v-if="loading" class="flex justify-center items-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
 
-    <!-- Bütçe Ayarları -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Bütçe Ayarları</h3>
-        <button @click="ayarlariKaydet" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-          Değişiklikleri Kaydet
-        </button>
-      </div>
+    <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+      {{ error }}
+    </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Yıllık Bütçe
-          </label>
-          <div class="flex items-center">
-            <input
-              v-model="ayarlar.yillikButce"
-              type="number"
-              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            />
-            <span class="ml-2 text-gray-600 dark:text-gray-400">₺</span>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Günlük Limit
-          </label>
-          <div class="flex items-center">
-            <input
-              v-model="ayarlar.gunlukLimit"
-              type="number"
-              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            />
-            <span class="ml-2 text-gray-600 dark:text-gray-400">₺</span>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Otomatik Bütçe Optimizasyonu
-          </label>
-          <div class="flex items-center mt-2">
-            <input
-              v-model="ayarlar.otomatikOptimizasyon"
-              type="checkbox"
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
-              Performansa göre bütçeyi otomatik optimize et
-            </span>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Bütçe Aşımı Uyarıları
-          </label>
-          <div class="flex items-center mt-2">
-            <input
-              v-model="ayarlar.butceUyarilari"
-              type="checkbox"
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
-              Bütçe limitleri aşıldığında e-posta bildirimi gönder
-            </span>
-          </div>
-        </div>
-      </div>
+    <div v-else class="bg-white rounded-lg shadow overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Kampanya
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Platform
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Günlük Bütçe
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Toplam Bütçe
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Durum
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              İşlemler
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr v-for="budget in budgets" :key="budget.id">
+            <td class="px-6 py-4 whitespace-nowrap">
+              {{ budget.campaign_name }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              {{ budget.platform }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              {{ budget.daily_budget }} ₺
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              {{ budget.total_budget }} ₺
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span 
+                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                :class="{
+                  'bg-green-100 text-green-800': budget.status === 'active',
+                  'bg-red-100 text-red-800': budget.status === 'inactive',
+                  'bg-yellow-100 text-yellow-800': budget.status === 'paused'
+                }"
+              >
+                {{ budget.status === 'active' ? 'Aktif' : budget.status === 'inactive' ? 'Pasif' : 'Duraklatıldı' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button 
+                class="text-blue-600 hover:text-blue-900 mr-3"
+                @click="router.push(`/admin/ads/budget/${budget.id}/edit`)"
+              >
+                Düzenle
+              </button>
+              <button 
+                class="text-red-600 hover:text-red-900"
+                @click="deleteBudget(budget.id)"
+              >
+                Sil
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
 
-interface ButceOzeti {
-  toplamButce: number
-  harcanan: number
-  buAyHarcanan: number
-  kalan: number
-  gunlukLimit: number
-  roi: number
-  roiDegisim: number
-}
+const router = useRouter()
+const budgets = ref([])
+const loading = ref(false)
+const error = ref('')
 
-interface PlatformButce {
-  id: number
-  ad: string
-  butce: number
-  harcanan: number
-}
-
-interface ButceAyarlari {
-  yillikButce: number
-  gunlukLimit: number
-  otomatikOptimizasyon: boolean
-  butceUyarilari: boolean
-}
-
-const butceOzeti = ref<ButceOzeti>({
-  toplamButce: 120000,
-  harcanan: 45000,
-  buAyHarcanan: 5000,
-  kalan: 75000,
-  gunlukLimit: 500,
-  roi: 245,
-  roiDegisim: 12
-})
-
-const platformButceleri = ref<PlatformButce[]>([
-  {
-    id: 1,
-    ad: 'Google Ads',
-    butce: 60000,
-    harcanan: 25000
-  },
-  {
-    id: 2,
-    ad: 'Facebook Ads',
-    butce: 40000,
-    harcanan: 15000
-  },
-  {
-    id: 3,
-    ad: 'Instagram Ads',
-    butce: 20000,
-    harcanan: 5000
-  }
-])
-
-const ayarlar = ref<ButceAyarlari>({
-  yillikButce: 120000,
-  gunlukLimit: 500,
-  otomatikOptimizasyon: true,
-  butceUyarilari: true
-})
-
-const formatFiyat = (fiyat: number): string => {
-  return fiyat.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-const ayarlariKaydet = async () => {
+const fetchBudgets = async () => {
   try {
-    // API'ye kaydetme işlemi burada yapılacak
-    console.log('Bütçe ayarları kaydediliyor:', ayarlar.value)
-  } catch (error) {
-    console.error('Bütçe ayarları kaydedilirken hata:', error)
+    loading.value = true
+    const response = await axios.get('/api/admin/ads/budgets')
+    budgets.value = response.data.data
+  } catch (err: any) {
+    error.value = err.response?.data?.message || 'Bütçe bilgileri alınamadı'
+  } finally {
+    loading.value = false
   }
 }
+
+onMounted(() => {
+  fetchBudgets()
+})
 </script> 
