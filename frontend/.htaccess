@@ -1,38 +1,23 @@
-# MIME Types
+RewriteEngine On
+RewriteBase /
+
+# MIME Type tanımlamaları
 AddType application/javascript .js
 AddType application/javascript .mjs
-AddType text/javascript .js
 AddType text/css .css
-AddType font/woff2 .woff2
+
+# Font dosyaları için MIME type
 AddType font/ttf .ttf
-AddType application/x-font-ttf .ttf
-AddType application/x-font-woff .woff
-AddType application/x-font-woff2 .woff2
+AddType font/woff .woff
+AddType font/woff2 .woff2
+AddType font/eot .eot
 
-<FilesMatch "\.(js|mjs|css|ttf|woff|woff2)$">
-    Header set Access-Control-Allow-Origin "*"
-    Header set Content-Type "application/javascript" env=IS_JS
-    Header set Content-Type "text/css" env=IS_CSS
-    Header set Content-Type "font/ttf" env=IS_TTF
-    Header set Content-Type "font/woff2" env=IS_WOFF2
-</FilesMatch>
+# SPA yönlendirmesi
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /index.html [L,QSA]
 
-SetEnvIf Request_URI "\.js$" IS_JS
-SetEnvIf Request_URI "\.css$" IS_CSS
-SetEnvIf Request_URI "\.ttf$" IS_TTF
-SetEnvIf Request_URI "\.woff2$" IS_WOFF2
-
-# SPA Routing
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
-</IfModule>
-
-# CORS
-<IfModule mod_headers.c>
-  Header set Access-Control-Allow-Origin "*"
-</IfModule> 
+# CORS ayarları
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization" 
