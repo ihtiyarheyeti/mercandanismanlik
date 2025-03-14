@@ -7,7 +7,7 @@ import { loadFull } from 'tsparticles'
 import Particles from 'vue3-particles'
 import axios from 'axios'
 
-axios.defaults.baseURL = 'https://mercandanismanlik.com'
+axios.defaults.baseURL = 'https://api.mercan.ltd'
 axios.defaults.withCredentials = true
 
 // Sanctum CSRF cookie
