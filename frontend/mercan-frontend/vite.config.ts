@@ -16,13 +16,16 @@ export default defineConfig({
       deleteOriginFile: false
     })
   ],
+  build: {
+    outDir: '../../',
+    emptyOutDir: false
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
   server: {
-    port: 5173,
     host: true,
     hmr: {
       protocol: 'ws',
