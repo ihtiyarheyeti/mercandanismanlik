@@ -3,9 +3,12 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Admin\SettingsController;
-use App\Http\Controllers\Admin\AdminStatsController;
-use App\Http\Controllers\Admin\SeoSettingController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TestimonialController;
+use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,38 +25,25 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// CSRF token rotası
-Route::get('/sanctum/csrf-cookie', '\Laravel\Sanctum\Http\Controllers\CsrfCookieController@show')
-    ->middleware(['api', 'web']);
-
 // Auth rotaları
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
+
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-// Settings rotaları
-Route::middleware('auth:sanctum')->group(function () {
-    // Admin rotaları
-    Route::prefix('admin')->group(function () {
-        // Settings
-        Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'index']);
-        Route::post('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'update']);
-        Route::post('/settings/logo', [App\Http\Controllers\Admin\SettingsController::class, 'updateLogo']);
-        Route::post('/settings/favicon', [App\Http\Controllers\Admin\SettingsController::class, 'updateFavicon']);
+Route::get('/blogs', [BlogController::class, 'index']);
+Route::get('/blogs/{id}', [BlogController::class, 'show']);
 
-        // İstatistikler
-        Route::prefix('stats')->group(function () {
-            Route::get('overview', [AdminStatsController::class, 'overview']);
-            Route::get('visitors', [AdminStatsController::class, 'visitors']);
-            Route::get('pageviews', [AdminStatsController::class, 'pageViews']);
-            Route::get('browsers', [AdminStatsController::class, 'browsers']);
-            Route::get('devices', [AdminStatsController::class, 'devices']);
-            Route::get('locations', [AdminStatsController::class, 'locations']);
-        });
+Route::get('/services', [ServiceController::class, 'index']);
+Route::get('/services/{id}', [ServiceController::class, 'show']);
 
-        // SEO Ayarları
-        Route::get('/seo-settings', [SeoSettingController::class, 'index']);
-        Route::post('/seo-settings', [SeoSettingController::class, 'update']);
-        Route::post('/seo-settings/generate-sitemap', [SeoSettingController::class, 'generateSitemap']);
-        Route::post('/seo-settings/submit-to-search-engines', [SeoSettingController::class, 'submitToSearchEngines']);
-    });
-});
+Route::get('/team', [TeamController::class, 'index']);
+Route::get('/team/{id}', [TeamController::class, 'show']);
+
+Route::get('/testimonials', [TestimonialController::class, 'index']);
+
+Route::post('/contact', [ContactController::class, 'store']);
+
+Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);

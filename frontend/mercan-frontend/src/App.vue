@@ -5,6 +5,9 @@ import CookieConsent from './components/CookieConsent.vue'
 import Notification from '@/components/Notification.vue'
 import { useSettingsStore } from '@/stores/settings'
 import { storeToRefs } from 'pinia'
+import { useSeoStore } from '@/stores/seo'
+import { useCookieStore } from '@/stores/cookie'
+import logo from '@/assets/images/logo.png'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,6 +16,8 @@ const dropdownOpen = ref(false)
 
 const settingsStore = useSettingsStore()
 const { seoSettings } = storeToRefs(settingsStore)
+const seoStore = useSeoStore()
+const cookieStore = useCookieStore()
 
 // Favicon'u güncelle
 watch(() => settingsStore.favicon, (newFavicon) => {
@@ -105,78 +110,75 @@ onMounted(async () => {
     <!-- Normal Layout -->
     <div v-if="!isLoginPage" class="layout">
       <header v-if="!isAdminRoute" class="bg-white shadow-sm sticky top-0 z-50">
-        <nav class="container mx-auto px-4 py-4">
-          <div class="flex items-center justify-between">
-            <!-- Logo -->
-            <RouterLink to="/" class="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors flex items-center">
-              <img 
-                v-if="settingsStore.logo" 
-                :src="settingsStore.logo" 
-                alt="Mercan Danışmanlık Logo" 
-                class="h-12 w-auto object-contain mr-2" 
-              />
-              <span v-else>Mercan Danışmanlık</span>
-            </RouterLink>
+        <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+              <div class="flex">
+                <RouterLink to="/" class="flex items-center">
+                  <img :src="logo" alt="Mercan Danışmanlık Logo" class="h-12 w-auto object-contain mr-2" />
+                </RouterLink>
+              </div>
 
-            <!-- Desktop Navigation -->
-            <div class="hidden lg:flex items-center space-x-8">
-              <RouterLink
-                v-for="(item, index) in menuItems"
-                :key="index"
-                :to="item.to"
-                class="text-gray-600 hover:text-blue-600 transition-colors"
-                active-class="text-blue-600 font-medium"
+              <!-- Desktop Navigation -->
+              <div class="hidden lg:flex items-center space-x-8">
+                <RouterLink
+                  v-for="(item, index) in menuItems"
+                  :key="index"
+                  :to="item.to"
+                  class="text-gray-600 hover:text-blue-600 transition-colors"
+                  active-class="text-blue-600 font-medium"
+                >
+                  {{ item.text }}
+                </RouterLink>
+              </div>
+
+              <!-- Mobile Menu Button -->
+              <button
+                @click="toggleMobileMenu"
+                class="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+                aria-label="Menu"
               >
-                {{ item.text }}
-              </RouterLink>
+                <svg
+                  class="w-6 h-6 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    v-if="!mobileMenuOpen"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                  <path
+                    v-else
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
             </div>
 
-            <!-- Mobile Menu Button -->
-            <button
-              @click="toggleMobileMenu"
-              class="lg:hidden p-2 rounded-lg hover:bg-gray-100"
-              aria-label="Menu"
+            <!-- Mobile Menu -->
+            <div
+              v-show="mobileMenuOpen"
+              class="lg:hidden mt-4 pb-4"
             >
-              <svg
-                class="w-6 h-6 text-gray-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  v-if="!mobileMenuOpen"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-                <path
-                  v-else
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Mobile Menu -->
-          <div
-            v-show="mobileMenuOpen"
-            class="lg:hidden mt-4 pb-4"
-          >
-            <div class="space-y-2">
-              <RouterLink
-                v-for="(item, index) in menuItems"
-                :key="index"
-                :to="item.to"
-                class="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                active-class="text-blue-600 bg-blue-50 font-medium"
-                @click="mobileMenuOpen = false"
-              >
-                {{ item.text }}
-              </RouterLink>
+              <div class="space-y-2">
+                <RouterLink
+                  v-for="(item, index) in menuItems"
+                  :key="index"
+                  :to="item.to"
+                  class="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  active-class="text-blue-600 bg-blue-50 font-medium"
+                  @click="mobileMenuOpen = false"
+                >
+                  {{ item.text }}
+                </RouterLink>
+              </div>
             </div>
           </div>
         </nav>

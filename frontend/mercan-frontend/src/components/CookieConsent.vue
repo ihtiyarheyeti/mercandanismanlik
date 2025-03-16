@@ -71,35 +71,35 @@ const getCategoryDescription = (category: string): string => {
 
 <template>
   <Transition name="slide-up">
-    <div v-if="showBanner" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg shadow-lg z-50">
-      <div class="container mx-auto p-4 md:p-6">
+    <div v-if="showBanner" class="fixed bottom-0 left-0 right-0 bg-gray-50/90 backdrop-blur-lg shadow-lg z-50">
+      <div class="container mx-auto px-4 py-3 md:py-4">
         <!-- Ana Banner -->
         <div v-if="!showDetails" class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div class="flex-1">
             <h3 class="text-lg font-semibold text-gray-800 mb-2">🍪 Çerez Politikası</h3>
-            <p class="text-gray-600">
+            <p class="text-gray-600 text-sm md:text-base">
               Size daha iyi bir deneyim sunmak için çerezleri kullanıyoruz. Web sitemizi kullanarak,
-              <RouterLink to="/cerez-politikasi" class="text-blue-600 hover:underline">çerez politikamızı</RouterLink>
+              <RouterLink to="/cerez-politikasi" class="text-blue-400 hover:text-blue-300">çerez politikamızı</RouterLink>
               kabul etmiş olursunuz.
             </p>
           </div>
           
-          <div class="flex flex-col sm:flex-row gap-3">
+          <div class="flex flex-col sm:flex-row items-center gap-2 md:gap-3 w-full md:w-auto">
             <button
               @click="showDetails = true"
-              class="px-4 py-2 text-gray-600 hover:text-gray-800 underline"
+              class="w-full sm:w-auto px-4 py-2 text-gray-600 hover:text-gray-800 text-sm"
             >
               Tercihleri Yönet
             </button>
             <button
               @click="acceptNecessary"
-              class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              class="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors text-sm"
             >
               Sadece Gerekli Olanlar
             </button>
             <button
               @click="acceptAll"
-              class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              class="w-full sm:w-auto px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm"
             >
               Tümünü Kabul Et
             </button>
@@ -107,12 +107,12 @@ const getCategoryDescription = (category: string): string => {
         </div>
 
         <!-- Detaylı Ayarlar -->
-        <div v-else class="space-y-6">
+        <div v-else class="space-y-4">
           <div class="flex justify-between items-center">
             <h3 class="text-xl font-semibold text-gray-800">Çerez Tercihleri</h3>
             <button
               @click="showDetails = false"
-              class="text-gray-500 hover:text-gray-700"
+              class="text-gray-600 hover:text-gray-800"
             >
               <span class="sr-only">Kapat</span>
               <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -122,8 +122,8 @@ const getCategoryDescription = (category: string): string => {
           </div>
 
           <!-- Çerez Kategorileri -->
-          <div class="space-y-4">
-            <div v-for="(categoryCookies, category) in cookiesByCategory" :key="category" class="border rounded-lg p-4">
+          <div class="space-y-3">
+            <div v-for="(categoryCookies, category) in cookiesByCategory" :key="category" class="border border-gray-300 bg-white rounded-lg p-3">
               <div class="flex items-center justify-between mb-2">
                 <div>
                   <h4 class="font-semibold text-gray-800">{{ getCategoryTitle(category) }}</h4>
@@ -136,12 +136,12 @@ const getCategoryDescription = (category: string): string => {
                     :disabled="category === 'necessary'"
                     class="sr-only peer"
                   >
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
 
               <!-- Kategori Detayları -->
-              <div class="mt-4 bg-gray-50 rounded-lg p-4">
+              <div class="mt-3 bg-gray-50 border border-gray-200 rounded-lg p-3">
                 <table class="w-full text-sm">
                   <thead>
                     <tr class="text-left text-gray-600">
@@ -165,16 +165,16 @@ const getCategoryDescription = (category: string): string => {
           </div>
 
           <!-- Kaydet Butonu -->
-          <div class="flex justify-end gap-3">
+          <div class="flex justify-end gap-3 pt-2">
             <button
               @click="showDetails = false"
-              class="px-4 py-2 text-gray-600 hover:text-gray-800"
+              class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm"
             >
               İptal
             </button>
             <button
               @click="savePreferences"
-              class="px-6 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              class="px-6 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm"
             >
               Tercihleri Kaydet
             </button>

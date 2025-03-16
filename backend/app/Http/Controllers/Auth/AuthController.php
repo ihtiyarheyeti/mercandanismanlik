@@ -82,7 +82,6 @@ class AuthController extends Controller
                     'email' => $user->email
                 ]
             ]);
-
         } catch (\Exception $e) {
             Log::error('Login hatası', [
                 'error' => $e->getMessage(),

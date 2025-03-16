@@ -36,11 +36,11 @@ const technologies = [
   { name: 'React', icon: 'fab fa-react text-blue-400' },
   { name: 'Node.js', icon: 'fab fa-node-js text-green-600' },
   { name: 'PHP', icon: 'fab fa-php text-purple-500' },
-  { name: 'WordPress', icon: 'fab fa-wordpress text-blue-600' },
-  { name: 'Instagram', icon: 'fab fa-instagram text-pink-500' },
-  { name: 'Twitter', icon: 'fab fa-twitter text-blue-400' },
-  { name: 'TikTok', icon: 'fab fa-tiktok text-black' },
-  { name: 'Facebook', icon: 'fab fa-facebook text-blue-600' }
+  { name: 'Laravel', icon: 'fab fa-laravel text-red-500' },
+  { name: 'Python', icon: 'fab fa-python text-blue-500' },
+  { name: 'Docker', icon: 'fab fa-docker text-blue-600' },
+  { name: 'Git', icon: 'fab fa-git-alt text-orange-600' },
+  { name: 'AWS', icon: 'fab fa-aws text-yellow-500' }
 ]
 
 const toggleChat = () => {
@@ -270,23 +270,23 @@ onUnmounted(() => {
               Mercan Danışmanlık
             </span>
           </h1>
-          <p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto">
+          <p class="text-xl md:text-2xl text-gray-300 mb-8 md:mb-12 max-w-3xl mx-auto">
             Dijital dünyada işinizi büyütmenize yardımcı oluyoruz. 
             <span class="text-blue-400">SEO</span>, 
             <span class="text-purple-400">web tasarım</span> ve 
             <span class="text-pink-400">dijital pazarlama</span> 
             çözümleriyle yanınızdayız.
           </p>
-          <div class="flex justify-center gap-4">
+          <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
             <a 
               href="/hizmetler" 
-              class="btn-primary text-lg px-8 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:rotate-1"
+              class="w-full sm:w-auto btn-primary text-base md:text-lg px-6 md:px-8 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:rotate-1 text-center"
             >
               Hizmetlerimiz
             </a>
             <a 
               href="/iletisim" 
-              class="btn-secondary text-lg px-8 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-rotate-1"
+              class="w-full sm:w-auto btn-secondary text-base md:text-lg px-6 md:px-8 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-rotate-1 text-center"
             >
               İletişime Geçin
             </a>

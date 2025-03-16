@@ -106,43 +106,28 @@ onMounted(() => {
         <h2 class="text-3xl font-bold text-white text-center mb-12 fade-up">Ekibimiz</h2>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div class="team-member bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center">
-            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 mx-auto mb-4"></div>
-            <h3 class="text-xl font-semibold text-white mb-1">Ahmet Yılmaz</h3>
-            <p class="text-gray-300 mb-2">Kurucu & CEO</p>
-            <div class="flex justify-center space-x-3 text-gray-300">
-              <a href="#" class="hover:text-blue-400 transition-colors"><i class="fab fa-linkedin"></i></a>
-              <a href="#" class="hover:text-blue-400 transition-colors"><i class="fab fa-twitter"></i></a>
-            </div>
+            <img src="@/assets/images/serdar-avatar.jpg" alt="Serdar T." class="w-32 h-32 mx-auto rounded-full mb-4 object-cover" />
+            <h3 class="text-xl font-semibold text-white mb-1">Serdar T.</h3>
+            <p class="text-gray-300 mb-2">Kurucu</p>
+            <p class="text-gray-400 text-sm">Yazılım geliştirme ve dijital pazarlama alanlarında 10+ yıl deneyim</p>
           </div>
 
           <div class="team-member bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center">
-            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-pink-400 to-red-400 mx-auto mb-4"></div>
-            <h3 class="text-xl font-semibold text-white mb-1">Ayşe Demir</h3>
-            <p class="text-gray-300 mb-2">Dijital Pazarlama Uzmanı</p>
-            <div class="flex justify-center space-x-3 text-gray-300">
-              <a href="#" class="hover:text-blue-400 transition-colors"><i class="fab fa-linkedin"></i></a>
-              <a href="#" class="hover:text-blue-400 transition-colors"><i class="fab fa-twitter"></i></a>
-            </div>
+            <img src="@/assets/images/hilal-avatar.jpg" alt="Hilal Ç." class="w-32 h-32 mx-auto rounded-full mb-4 object-cover" />
+            <h3 class="text-xl font-semibold text-white mb-1">Hilal Ç.</h3>
+            <p class="text-gray-300 mb-2">Sosyal Medya Uzmanı</p>
           </div>
 
           <div class="team-member bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center">
-            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-green-400 to-teal-400 mx-auto mb-4"></div>
-            <h3 class="text-xl font-semibold text-white mb-1">Mehmet Kaya</h3>
-            <p class="text-gray-300 mb-2">Yazılım Geliştirici</p>
-            <div class="flex justify-center space-x-3 text-gray-300">
-              <a href="#" class="hover:text-blue-400 transition-colors"><i class="fab fa-linkedin"></i></a>
-              <a href="#" class="hover:text-blue-400 transition-colors"><i class="fab fa-github"></i></a>
-            </div>
+            <img src="@/assets/images/lutfullah-avatar.jpg" alt="Lütfullah Ö." class="w-32 h-32 mx-auto rounded-full mb-4 object-cover" />
+            <h3 class="text-xl font-semibold text-white mb-1">Lütfullah Ö.</h3>
+            <p class="text-gray-300 mb-2">Yazılım Geliştirme</p>
           </div>
 
           <div class="team-member bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center">
-            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 mx-auto mb-4"></div>
-            <h3 class="text-xl font-semibold text-white mb-1">Zeynep Şahin</h3>
-            <p class="text-gray-300 mb-2">UI/UX Tasarımcı</p>
-            <div class="flex justify-center space-x-3 text-gray-300">
-              <a href="#" class="hover:text-blue-400 transition-colors"><i class="fab fa-linkedin"></i></a>
-              <a href="#" class="hover:text-blue-400 transition-colors"><i class="fab fa-dribbble"></i></a>
-            </div>
+            <img src="@/assets/images/alaaddin-avatar.jpg" alt="Alaaddin B." class="w-32 h-32 mx-auto rounded-full mb-4 object-cover" />
+            <h3 class="text-xl font-semibold text-white mb-1">Alaaddin B.</h3>
+            <p class="text-gray-300 mb-2">Grafik Tasarım</p>
           </div>
         </div>
       </div>

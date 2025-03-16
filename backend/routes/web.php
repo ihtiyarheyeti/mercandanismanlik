@@ -25,6 +25,12 @@ Route::get('/', function () {
 });
 
 // Auth rotaları
+Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+});
+
+// Login sayfası için GET route
+Route::get('/login', function () {
+    return view('login');
 });

@@ -31,9 +31,9 @@ const services = [
   },
   {
     id: 'ads',
-    title: 'Google ve Sosyal Medya Reklamları',
-    description: 'Google Ads ve sosyal medya platformlarında etkili reklam kampanyaları ile potansiyel müşterilerinize ulaşıyoruz.',
-    icon: 'fa-bullhorn',
+    title: 'Grafik Tasarım',
+    description: 'Logo, kurumsal kimlik, sosyal medya görselleri ve dijital pazarlama materyalleri ile markanızı öne çıkarıyoruz.',
+    icon: 'fa-palette',
     color: 'text-red-400'
   },
   {
@@ -68,27 +68,18 @@ onMounted(() => {
   // Kartlar için giriş animasyonu
   const cards = document.querySelectorAll('.service-card')
   cards.forEach((card, index) => {
-    gsap.fromTo(card,
-      {
-        opacity: 0,
-        y: 100,
-        rotateY: 45
-      },
-      {
-        opacity: 1,
-        y: 0,
-        rotateY: 0,
-        duration: 1,
-        delay: index * 0.2,
-        ease: "back.out(1.7)",
-        scrollTrigger: {
-          trigger: card,
-          start: 'top bottom-=100',
-          end: 'bottom top',
-          toggleActions: 'play none none none'
-        }
+    gsap.from(card, {
+      y: 50,
+      opacity: 0,
+      duration: 0.5,
+      delay: index * 0.1,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: card,
+        start: 'top bottom-=100',
+        toggleActions: 'play none none reverse'
       }
-    )
+    })
   })
 
   // Avatar animasyonları

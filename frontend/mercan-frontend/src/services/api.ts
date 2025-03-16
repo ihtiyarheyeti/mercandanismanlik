@@ -1,16 +1,13 @@
-import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
+import axios from 'axios'
+import type { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 
-declare global {
-  interface ImportMeta {
-    env: {
-      VITE_API_URL: string
-    }
-  }
+interface ImportMetaEnv {
+  VITE_API_URL: string
 }
 
 // API için instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://mercandanismanlik.com',
+  baseURL: 'http://localhost:8000/api', // 5173 yerine 8000 olması gerekiyor
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -21,8 +18,14 @@ const api = axios.create({
 
 // Request interceptor
 api.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
-    // URL'yi olduğu gibi kullan, /api prefix'i eklemeye gerek yok
+  (config: InternalAxiosRequestConfig) => {
+    // Token'ı ekle
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+
+    // URL'yi olduğu gibi kullan
     if (config.url) {
       config.url = config.url.startsWith('/') ? config.url : '/' + config.url
     }

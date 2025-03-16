@@ -331,7 +331,7 @@ const saveLogo = async () => {
 
   try {
     savingLogo.value = true;
-    const response = await api.post('/admin/settings/logo', formData);
+    const response = await api.post('/settings/logo', formData);
     settings.value.logo = response.data.logo;
     selectedLogo.value = null;
     await settingsStore.fetchSettings();
@@ -359,7 +359,7 @@ const saveFavicon = async () => {
 
   try {
     savingFavicon.value = true;
-    const response = await api.post('/admin/settings/favicon', formData);
+    const response = await api.post('/settings/favicon', formData);
     settings.value.favicon = response.data.favicon;
     selectedFavicon.value = null;
     await settingsStore.fetchSettings();

@@ -69,10 +69,10 @@ const handleLogin = async () => {
 
   try {
     // CSRF token isteği
-    await api.get('/sanctum/csrf-cookie')
+    await api.get('sanctum/csrf-cookie')
     
     // Login isteği
-    const response = await api.post('/login', {
+    const response = await api.post('api/login', {
       email: email.value,
       password: password.value
     })
