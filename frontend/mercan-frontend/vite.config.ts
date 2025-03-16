@@ -17,7 +17,7 @@ export default defineConfig({
     })
   ],
   build: {
-    outDir: '../../',
+    outDir: '../..',
     emptyOutDir: false
   },
   resolve: {
