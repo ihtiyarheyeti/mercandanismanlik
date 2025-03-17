@@ -245,11 +245,10 @@ onUnmounted(() => {
       </div>
       
       <div class="relative max-w-7xl mx-auto text-center">
-        <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 sm:mb-6">
-          <span class="block">Mercan</span>
-          <span class="block">Danışmanlık</span>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 px-2">
+          <span class="inline-block">Mercan Danışmanlık</span>
         </h1>
-        <p class="text-lg sm:text-xl text-gray-300 mb-8 sm:mb-10 max-w-3xl mx-auto px-4">
+        <p class="text-base sm:text-lg md:text-xl text-gray-300 mb-8 sm:mb-10 max-w-3xl mx-auto px-4">
           Dijital dünyada işinizi büyütmenize yardımcı oluyoruz. 
           <span class="text-blue-400">SEO</span>, 
           <span class="text-purple-400">web tasarım</span> ve 
