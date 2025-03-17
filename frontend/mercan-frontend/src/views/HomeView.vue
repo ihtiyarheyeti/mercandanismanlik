@@ -245,23 +245,23 @@ onUnmounted(() => {
       </div>
       
       <div class="relative container mx-auto px-4 h-screen flex items-center justify-center">
-        <div class="flex flex-col items-center max-w-4xl mx-auto text-center">
-          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+        <div class="flex flex-col items-center max-w-4xl mx-auto text-center mt-16 sm:mt-0">
+          <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
             <span class="block">Mercan</span>
             <span class="block">Danışmanlık</span>
           </h1>
-          <p class="text-sm sm:text-base md:text-lg text-gray-300 max-w-3xl mx-auto mb-8">
+          <p class="text-base sm:text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8 px-4">
             Dijital dünyada işinizi büyütmenize yardımcı oluyoruz. 
             <span class="text-blue-400">SEO</span>, 
             <span class="text-purple-400">web tasarım</span> ve 
             <span class="text-pink-400">dijital pazarlama</span> 
             çözümleriyle yanınızdayız.
           </p>
-          <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            <a href="/hizmetler" class="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white text-sm sm:text-base rounded-lg hover:bg-blue-700 transition-colors duration-300">
+          <div class="flex flex-col sm:flex-row items-center gap-4 w-full px-4 sm:px-0">
+            <a href="/hizmetler" class="w-full px-8 py-4 bg-blue-600 text-white text-lg rounded-lg hover:bg-blue-700 transition-colors duration-300 text-center">
               Hizmetlerimiz
             </a>
-            <a href="/iletisim" class="w-full sm:w-auto px-8 py-3 bg-gray-700 text-white text-sm sm:text-base rounded-lg hover:bg-gray-800 transition-colors duration-300">
+            <a href="/iletisim" class="w-full px-8 py-4 bg-gray-700 text-white text-lg rounded-lg hover:bg-gray-800 transition-colors duration-300 text-center">
               İletişime Geçin
             </a>
           </div>
