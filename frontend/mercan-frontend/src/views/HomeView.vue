@@ -9,15 +9,10 @@ import 'vue3-carousel/dist/carousel.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const isChatOpen = ref(false)
-const message = ref('')
+const showChat = ref(false)
+const newMessage = ref('')
 const chatMessages = ref([
-  {
-    id: 1,
-    type: 'system',
-    message: 'Mercan Danışmanlık\'a hoş geldiniz! Size nasıl yardımcı olabiliriz?',
-    time: new Date()
-  }
+  { type: 'agent', text: 'Merhaba! Size nasıl yardımcı olabilirim?' }
 ])
 
 // Yeni animasyon değişkenleri
@@ -44,30 +39,26 @@ const technologies = [
 ]
 
 const toggleChat = () => {
-  isChatOpen.value = !isChatOpen.value
+  showChat.value = !showChat.value
 }
 
 const sendMessage = () => {
-  if (!message.value.trim()) return
-
+  if (!newMessage.value.trim()) return
+  
   chatMessages.value.push({
-    id: chatMessages.value.length + 1,
     type: 'user',
-    message: message.value,
-    time: new Date()
+    text: newMessage.value
   })
-
-  // Simüle edilmiş otomatik yanıt
+  
+  // Simulate agent response
   setTimeout(() => {
     chatMessages.value.push({
-      id: chatMessages.value.length + 1,
       type: 'agent',
-      message: 'Mesajınız için teşekkürler. En kısa sürede size dönüş yapacağız.',
-      time: new Date()
+      text: 'Mesajınız alındı. En kısa sürede size dönüş yapacağız.'
     })
   }, 1000)
-
-  message.value = ''
+  
+  newMessage.value = ''
 }
 
 const updateMousePosition = (event: MouseEvent) => {
@@ -246,223 +237,74 @@ onUnmounted(() => {
 
 <template>
   <div class="relative">
-    <!-- Hero section with particles -->
-    <div class="relative h-[70vh] bg-black overflow-hidden">
-      <!-- Particles background -->
-      <div id="tsparticles" class="absolute inset-0" style="height: 100%"></div>
-
-      <!-- Interactive background effect -->
-      <div 
-        class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"
-        :style="{
-          transform: windowSize.width ? `translate(${(mousePos.x / windowSize.width - 0.5) * 20}px, ${(mousePos.y / windowSize.height - 0.5) * 20}px)` : 'none'
-        }"
-      ></div>
-
-      <!-- Content -->
-      <div class="relative h-full flex items-center">
-        <div ref="heroTextRef" class="container mx-auto px-4 py-16 text-center">
-          <h1 
-            class="text-5xl md:text-6xl font-bold text-white mb-6 relative"
-            :class="{ 'animate-bounce-slow': isHeroVisible }"
-          >
-            <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-              Mercan Danışmanlık
-            </span>
-          </h1>
-          <p class="text-xl md:text-2xl text-gray-300 mb-8 md:mb-12 max-w-3xl mx-auto">
-            Dijital dünyada işinizi büyütmenize yardımcı oluyoruz. 
-            <span class="text-blue-400">SEO</span>, 
-            <span class="text-purple-400">web tasarım</span> ve 
-            <span class="text-pink-400">dijital pazarlama</span> 
-            çözümleriyle yanınızdayız.
-          </p>
-          <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <a 
-              href="/hizmetler" 
-              class="w-full sm:w-auto btn-primary text-base md:text-lg px-6 md:px-8 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:rotate-1 text-center"
-            >
-              Hizmetlerimiz
-            </a>
-            <a 
-              href="/iletisim" 
-              class="w-full sm:w-auto btn-secondary text-base md:text-lg px-6 md:px-8 py-3 rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-rotate-1 text-center"
-            >
-              İletişime Geçin
-            </a>
-          </div>
+    <!-- Hero Section -->
+    <div class="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div class="absolute inset-0">
+        <div id="tsparticles" ref="particlesContainer" class="absolute inset-0"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 to-gray-900/90"></div>
+      </div>
+      
+      <div class="relative max-w-7xl mx-auto text-center">
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 sm:mb-6">
+          <span class="block">Mercan</span>
+          <span class="block">Danışmanlık</span>
+        </h1>
+        <p class="text-lg sm:text-xl text-gray-300 mb-8 sm:mb-10 max-w-3xl mx-auto px-4">
+          Dijital dünyada işinizi büyütmenize yardımcı oluyoruz. 
+          <span class="text-blue-400">SEO</span>, 
+          <span class="text-purple-400">web tasarım</span> ve 
+          <span class="text-pink-400">dijital pazarlama</span> 
+          çözümleriyle yanınızdayız.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+          <a href="/hizmetler" class="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
+            Hizmetlerimiz
+          </a>
+          <a href="/iletisim" class="w-full sm:w-auto px-8 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors duration-300">
+            İletişime Geçin
+          </a>
         </div>
       </div>
     </div>
 
-    <!-- Services section -->
-    <div ref="servicesRef" class="services-section relative py-24 bg-gradient-to-b from-gray-900 to-blue-900">
+    <!-- Services Section -->
+    <div class="relative py-16 bg-gradient-to-b from-gray-900 to-blue-900">
       <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold text-center text-white mb-4 relative">
+        <h2 class="text-3xl sm:text-4xl font-bold text-center text-white mb-4 relative">
           <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
             Profesyonel Dijital Çözümler
           </span>
         </h2>
-        <p class="text-gray-300 text-center mb-16 max-w-3xl mx-auto">
+        <p class="text-gray-300 text-center mb-12 sm:mb-16 max-w-3xl mx-auto px-4">
           İşinizi büyütmek için ihtiyacınız olan tüm dijital hizmetleri tek çatı altında sunuyoruz.
         </p>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <!-- Yazılım Geliştirme -->
-          <div class="service-card group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-lg p-8 transition-all duration-500">
-            <div class="absolute inset-0 bg-gradient-to-br from-blue-600/50 to-cyan-600/50 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-            <div class="relative z-10">
-              <div class="text-blue-400 text-5xl mb-6 transform group-hover:scale-110 group-hover:text-white transition-all duration-500">
-                <i class="fas fa-code"></i>
-              </div>
-              <h3 class="text-2xl font-semibold text-white mb-4 group-hover:text-white transition-colors duration-500">Yazılım Geliştirme</h3>
-              <p class="text-gray-300 mb-6 group-hover:text-white/90 transition-colors duration-500">İşinize özel yazılım çözümleri geliştiriyoruz.</p>
-              <ul class="text-gray-300 space-y-2 transition-all duration-500 group-hover:translate-x-2">
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Özel Web Uygulamaları
-                </li>
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  E-ticaret Sistemleri
-                </li>
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  API Entegrasyonları
-                </li>
-              </ul>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <!-- Web Design Card -->
+          <div class="service-card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 transform transition-all duration-300 hover:scale-105">
+            <div class="text-center mb-4">
+              <i class="fas fa-laptop-code text-4xl text-blue-400"></i>
             </div>
+            <h3 class="text-xl sm:text-2xl font-semibold text-white mb-3">Web Tasarım</h3>
+            <p class="text-gray-300 text-sm sm:text-base">Modern ve kullanıcı dostu web siteleri tasarlıyoruz.</p>
           </div>
 
-          <!-- Web Tasarım -->
-          <div class="service-card group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-lg p-8 transition-all duration-500">
-            <div class="absolute inset-0 bg-gradient-to-br from-purple-600/50 to-pink-600/50 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-            <div class="relative z-10">
-              <div class="text-purple-400 text-5xl mb-6 transform group-hover:scale-110 group-hover:text-white transition-all duration-500">
-                <i class="fas fa-laptop-code"></i>
-              </div>
-              <h3 class="text-2xl font-semibold text-white mb-4 group-hover:text-white transition-colors duration-500">Web Tasarım</h3>
-              <p class="text-gray-300 mb-6 group-hover:text-white/90 transition-colors duration-500">Modern ve etkileyici web siteleri tasarlıyoruz.</p>
-              <ul class="text-gray-300 space-y-2 transition-all duration-500 group-hover:translate-x-2">
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Responsive Tasarım
-                </li>
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  UI/UX Tasarımı
-                </li>
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  WordPress Çözümleri
-                </li>
-              </ul>
+          <!-- Digital Marketing Card -->
+          <div class="service-card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 transform transition-all duration-300 hover:scale-105">
+            <div class="text-center mb-4">
+              <i class="fas fa-bullhorn text-4xl text-purple-400"></i>
             </div>
+            <h3 class="text-xl sm:text-2xl font-semibold text-white mb-3">Dijital Pazarlama</h3>
+            <p class="text-gray-300 text-sm sm:text-base">Markanızı dijital dünyada öne çıkarıyoruz.</p>
           </div>
 
-          <!-- Google Ads -->
-          <div class="service-card group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-lg p-8 transition-all duration-500">
-            <div class="absolute inset-0 bg-gradient-to-br from-red-600/50 to-yellow-600/50 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-            <div class="relative z-10">
-              <div class="text-red-400 text-5xl mb-6 transform group-hover:scale-110 group-hover:text-white transition-all duration-500">
-                <i class="fab fa-google"></i>
-              </div>
-              <h3 class="text-2xl font-semibold text-white mb-4 group-hover:text-white transition-colors duration-500">Google Ads</h3>
-              <p class="text-gray-300 mb-6 group-hover:text-white/90 transition-colors duration-500">Etkili Google Ads kampanyaları yönetiyoruz.</p>
-              <ul class="text-gray-300 space-y-2 transition-all duration-500 group-hover:translate-x-2">
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Arama Ağı Reklamları
-                </li>
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Görüntülü Reklamlar
-                </li>
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Remarketing
-                </li>
-              </ul>
+          <!-- SEO Card -->
+          <div class="service-card bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 transform transition-all duration-300 hover:scale-105">
+            <div class="text-center mb-4">
+              <i class="fas fa-search text-4xl text-pink-400"></i>
             </div>
+            <h3 class="text-xl sm:text-2xl font-semibold text-white mb-3">SEO Optimizasyonu</h3>
+            <p class="text-gray-300 text-sm sm:text-base">Arama motorlarında üst sıralarda yer alın.</p>
           </div>
-
-          <!-- Facebook Ads -->
-          <div class="service-card group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-lg p-8 transition-all duration-500">
-            <div class="absolute inset-0 bg-gradient-to-br from-blue-700/50 to-blue-400/50 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-            <div class="relative z-10">
-              <div class="text-blue-400 text-5xl mb-6 transform group-hover:scale-110 group-hover:text-white transition-all duration-500">
-                <i class="fab fa-facebook"></i>
-              </div>
-              <h3 class="text-2xl font-semibold text-white mb-4 group-hover:text-white transition-colors duration-500">Facebook Ads</h3>
-              <p class="text-gray-300 mb-6 group-hover:text-white/90 transition-colors duration-500">Hedefli Facebook & Instagram reklamları.</p>
-              <ul class="text-gray-300 space-y-2 transition-all duration-500 group-hover:translate-x-2">
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Feed Reklamları
-                </li>
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Story Reklamları
-                </li>
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Messenger Reklamları
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Grafik Tasarım -->
-          <div class="service-card group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-lg p-8 transition-all duration-500">
-            <div class="absolute inset-0 bg-gradient-to-br from-pink-600/50 to-orange-600/50 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-            <div class="relative z-10">
-              <div class="text-pink-400 text-5xl mb-6 transform group-hover:scale-110 group-hover:text-white transition-all duration-500">
-                <i class="fas fa-palette"></i>
-              </div>
-              <h3 class="text-2xl font-semibold text-white mb-4 group-hover:text-white transition-colors duration-500">Grafik Tasarım</h3>
-              <p class="text-gray-300 mb-6 group-hover:text-white/90 transition-colors duration-500">Profesyonel grafik tasarım hizmetleri.</p>
-              <ul class="text-gray-300 space-y-2 transition-all duration-500 group-hover:translate-x-2">
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Katalog Tasarımı
-                </li>
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Banner Tasarımı
-                </li>
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Sosyal Medya Görselleri
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Sosyal Medya Danışmanlığı -->
-          <div class="service-card group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-lg p-8 transition-all duration-500">
-            <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/50 to-purple-600/50 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-            <div class="relative z-10">
-              <div class="text-indigo-400 text-5xl mb-6 transform group-hover:scale-110 group-hover:text-white transition-all duration-500">
-                <i class="fas fa-hashtag"></i>
-              </div>
-              <h3 class="text-2xl font-semibold text-white mb-4 group-hover:text-white transition-colors duration-500">Sosyal Medya Danışmanlığı</h3>
-              <p class="text-gray-300 mb-6 group-hover:text-white/90 transition-colors duration-500">Sosyal medya varlığınızı güçlendiriyoruz.</p>
-              <ul class="text-gray-300 space-y-2 transition-all duration-500 group-hover:translate-x-2">
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  İçerik Yönetimi
-                </li>
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Topluluk Yönetimi
-                </li>
-                <li class="flex items-center group-hover:text-white/90">
-                  <i class="fas fa-check text-green-400 mr-2 group-hover:text-white"></i>
-                  Strateji Geliştirme
-                </li>
-              </ul>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>
@@ -544,58 +386,49 @@ onUnmounted(() => {
     </div>
   </div>
 
-  <!-- Canlı Sohbet -->
+  <!-- Chat Section -->
   <div class="fixed bottom-4 right-4 z-50">
-    <!-- Sohbet Butonu -->
     <button 
       @click="toggleChat"
-      class="bg-blue-600 text-white rounded-full p-4 shadow-lg hover:bg-blue-700 transition-colors duration-300"
+      class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-300"
     >
-      <i :class="isChatOpen ? 'fas fa-times' : 'fas fa-comments'" class="text-2xl"></i>
+      <i class="fas fa-comments text-2xl"></i>
     </button>
 
-    <!-- Sohbet Penceresi -->
+    <!-- Chat Window -->
     <div 
-      v-if="isChatOpen"
-      class="absolute bottom-16 right-0 w-96 bg-white rounded-lg shadow-2xl overflow-hidden transition-all duration-300"
+      v-if="showChat"
+      class="absolute bottom-16 right-0 w-[300px] sm:w-[350px] bg-white rounded-lg shadow-xl"
     >
-      <!-- Başlık -->
-      <div class="bg-blue-600 text-white p-4">
-        <h3 class="text-lg font-semibold">Canlı Destek</h3>
-        <p class="text-sm opacity-90">Size nasıl yardımcı olabiliriz?</p>
+      <div class="p-4 bg-blue-600 text-white rounded-t-lg flex justify-between items-center">
+        <h3 class="font-semibold">Canlı Destek</h3>
+        <button @click="toggleChat" class="text-white hover:text-gray-200">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
-
-      <!-- Mesajlar -->
-      <div class="h-96 overflow-y-auto p-4 bg-gray-50">
-        <div 
-          v-for="msg in chatMessages" 
-          :key="msg.id"
+      
+      <div class="p-4 h-[300px] overflow-y-auto bg-gray-50">
+        <div v-for="(message, index) in chatMessages" :key="index" 
           :class="[
-            'mb-4 max-w-[80%] rounded-lg p-3',
-            msg.type === 'user' ? 'ml-auto bg-blue-600 text-white' : 
-            msg.type === 'agent' ? 'bg-gray-200 text-gray-800' :
-            'bg-gray-100 text-gray-600 text-sm italic w-full text-center'
+            'mb-3 p-2 rounded-lg max-w-[75%]',
+            message.type === 'user' ? 'ml-auto bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'
           ]"
         >
-          <p>{{ msg.message }}</p>
-          <span class="text-xs opacity-75 block mt-1">
-            {{ new Date(msg.time).toLocaleTimeString() }}
-          </span>
+          {{ message.text }}
         </div>
       </div>
 
-      <!-- Mesaj Gönderme -->
       <div class="p-4 border-t">
         <form @submit.prevent="sendMessage" class="flex gap-2">
-          <input
-            v-model="message"
-            type="text"
-            placeholder="Mesajınızı yazın..."
-            class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <input 
+            v-model="newMessage" 
+            type="text" 
+            placeholder="Mesajınız..."
+            class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-600"
           >
           <button 
             type="submit"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <i class="fas fa-paper-plane"></i>
           </button>
