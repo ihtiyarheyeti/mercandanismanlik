@@ -238,13 +238,13 @@ onUnmounted(() => {
 <template>
   <div class="relative">
     <!-- Hero Section -->
-    <div class="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="relative min-h-screen flex items-start justify-center pt-32 px-4 sm:px-6 lg:px-8">
       <div class="absolute inset-0">
         <div id="tsparticles" ref="particlesContainer" class="absolute inset-0"></div>
         <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 to-gray-900/90"></div>
       </div>
       
-      <div class="relative max-w-7xl mx-auto text-center mt-20">
+      <div class="relative max-w-7xl mx-auto text-center">
         <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 px-2 leading-tight">
           <span class="block mb-1">Mercan</span>
           <span class="block">Danışmanlık</span>
