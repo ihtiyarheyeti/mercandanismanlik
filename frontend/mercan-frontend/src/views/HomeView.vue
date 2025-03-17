@@ -238,31 +238,33 @@ onUnmounted(() => {
 <template>
   <div class="relative">
     <!-- Hero Section -->
-    <div class="relative min-h-screen flex items-start justify-center pt-32 px-4 sm:px-6 lg:px-8">
+    <div class="relative min-h-screen flex flex-col justify-start px-4 sm:px-6 lg:px-8">
       <div class="absolute inset-0">
         <div id="tsparticles" ref="particlesContainer" class="absolute inset-0"></div>
         <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 to-gray-900/90"></div>
       </div>
       
-      <div class="relative max-w-7xl mx-auto text-center">
-        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 px-2 leading-tight">
-          <span class="block mb-1">Mercan</span>
-          <span class="block">Danışmanlık</span>
-        </h1>
-        <p class="text-sm sm:text-base md:text-lg text-gray-300 mb-6 sm:mb-8 max-w-3xl mx-auto px-2">
-          Dijital dünyada işinizi büyütmenize yardımcı oluyoruz. 
-          <span class="text-blue-400">SEO</span>, 
-          <span class="text-purple-400">web tasarım</span> ve 
-          <span class="text-pink-400">dijital pazarlama</span> 
-          çözümleriyle yanınızdayız.
-        </p>
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-2">
-          <a href="/hizmetler" class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 text-white text-sm sm:text-base rounded-lg hover:bg-blue-700 transition-colors duration-300">
-            Hizmetlerimiz
-          </a>
-          <a href="/iletisim" class="w-full sm:w-auto px-6 py-2.5 bg-gray-700 text-white text-sm sm:text-base rounded-lg hover:bg-gray-800 transition-colors duration-300">
-            İletişime Geçin
-          </a>
+      <div class="relative max-w-7xl mx-auto text-center mt-[120px]">
+        <div class="space-y-6">
+          <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white px-2 leading-tight">
+            <span class="block mb-1">Mercan</span>
+            <span class="block">Danışmanlık</span>
+          </h1>
+          <p class="text-sm sm:text-base md:text-lg text-gray-300 max-w-3xl mx-auto px-2">
+            Dijital dünyada işinizi büyütmenize yardımcı oluyoruz. 
+            <span class="text-blue-400">SEO</span>, 
+            <span class="text-purple-400">web tasarım</span> ve 
+            <span class="text-pink-400">dijital pazarlama</span> 
+            çözümleriyle yanınızdayız.
+          </p>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-2">
+            <a href="/hizmetler" class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 text-white text-sm sm:text-base rounded-lg hover:bg-blue-700 transition-colors duration-300">
+              Hizmetlerimiz
+            </a>
+            <a href="/iletisim" class="w-full sm:w-auto px-6 py-2.5 bg-gray-700 text-white text-sm sm:text-base rounded-lg hover:bg-gray-800 transition-colors duration-300">
+              İletişime Geçin
+            </a>
+          </div>
         </div>
       </div>
     </div>
