@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
+import MobileMenu from './components/MobileMenu.vue'
+
+const isMobileMenuOpen = ref(false)
 </script>
 
 <template>
@@ -33,7 +37,10 @@ import { RouterLink, RouterView } from 'vue-router'
           </div>
 
           <!-- Mobile Menu Button -->
-          <button class="md:hidden p-2 rounded-lg hover:bg-gray-100">
+          <button 
+            class="md:hidden p-2 rounded-lg hover:bg-gray-100"
+            @click="isMobileMenuOpen = true"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
@@ -42,8 +49,14 @@ import { RouterLink, RouterView } from 'vue-router'
       </nav>
     </header>
 
+    <!-- Mobile Menu -->
+    <MobileMenu 
+      :is-open="isMobileMenuOpen"
+      @close="isMobileMenuOpen = false"
+    />
+
     <!-- Main Content -->
-    <main class="flex-grow">
+    <main class="flex-grow pt-20 md:pt-24">
       <RouterView v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />
