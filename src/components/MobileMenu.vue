@@ -37,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+/* Author: Serdar Topal */
 import { RouterLink } from 'vue-router'
 
 const props = defineProps<{

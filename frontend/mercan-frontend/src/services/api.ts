@@ -7,7 +7,7 @@ interface ImportMetaEnv {
 
 // API için instance
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api', // 5173 yerine 8000 olması gerekiyor
+  baseURL: 'https://mercandanismanlik.com/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

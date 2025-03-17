@@ -34,4 +34,12 @@ yarn-error.log
 
 # Keep public and assets
 !public/
-!assets/ 
+!assets/
+
+# Asset dosyaları hariç
+!public/assets/
+!public/assets/*
+!backend/public/assets/
+!backend/public/assets/*
+!frontend/mercan-frontend/public/assets/
+!frontend/mercan-frontend/public/assets/* 
