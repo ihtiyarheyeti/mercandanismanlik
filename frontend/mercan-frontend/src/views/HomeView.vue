@@ -244,10 +244,10 @@ onUnmounted(() => {
         <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 to-gray-900/90"></div>
       </div>
       
-      <div class="relative max-w-7xl mx-auto text-center">
+      <div class="relative max-w-7xl mx-auto text-center mt-20">
         <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 px-2 leading-tight">
-          <span class="inline">Mercan</span>
-          <span class="inline"> Danışmanlık</span>
+          <span class="block mb-1">Mercan</span>
+          <span class="block">Danışmanlık</span>
         </h1>
         <p class="text-sm sm:text-base md:text-lg text-gray-300 mb-6 sm:mb-8 max-w-3xl mx-auto px-2">
           Dijital dünyada işinizi büyütmenize yardımcı oluyoruz. 
