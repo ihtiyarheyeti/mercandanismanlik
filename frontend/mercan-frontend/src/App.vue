@@ -110,7 +110,7 @@ onMounted(async () => {
     <!-- Normal Layout -->
     <div v-if="!isLoginPage" class="layout">
       <header v-if="!isAdminRoute" class="bg-white shadow-sm sticky top-0 z-50">
-        <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+        <nav class="bg-white shadow-lg w-full">
           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
               <div class="flex">
